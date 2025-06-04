@@ -1,0 +1,13 @@
+services:
+  # For development environment we will use a single database instance
+  database:
+    image: postgres:17
+    container_name: my_service_db
+    environment:
+      POSTGRES_USER: antman
+      POSTGRES_PASSWORD: zRSuuR1Pz9VdJB
+      POSTGRES_DB: startup_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
