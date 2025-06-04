@@ -1,22 +1,22 @@
 database = "payment_service"
-dbUrl = "postgres://user:password@localhost:5432/$(database)?sslmode=disable"
+dbUrl = "postgres://antman:zRSuuR1Pz9VdJB@localhost:5432/$(database)?sslmode=disable"
 
 create:
 	@read -p "Enter the migration name: " name; \
 	migrate create -ext sql -seq $$name
 
 up:
-	@read -p "Enter the migration version to apply (or 'latest' for all): " version; \
-	if [ "$$version" = "latest" ]; then \
-		migrate -path . -database $$dbUrl up; \
+	@read -p "Enter the migration version to apply (or type 'a' for all): " version; \
+	if [ "$$version" = "a" ]; then \
+		migrate -database $(dbUrl) -path . up; \
 	else \
-		migrate -path . -database $$dbUrl up $$version; \
+		migrate -database $(dbUrl) -path . up $(version); \
 	fi
 
 down:
-	@read -p "Enter the migration version to revert (or 'latest' for all): " version; \
-	if [ "$$version" = "latest" ]; then \
-		migrate -path . -database $$dbUrl down; \
+	@read -p "Enter the migration version to revert (or type 'a' for all): " version; \
+	if [ "$$version" = "a" ]; then \
+		migrate -database $(dbUrl) -path . down; \
 	else \
-		migrate -path . -database $$dbUrl down $$version; \
+		migrate -database $(dbUrl) -path . down $(version); \
 	fi
