@@ -79,3 +79,25 @@ Order Shipped → User Service (send notification)
 - Prometheus + Grafana
 - Jaeger for tracing
 - ELK stack for logs
+
+### Database initialize
+
+```bash
+podman compose exec -it database "PGPASSWORD=zRSuuR1Pz9VdJB psql -U antman -d postgres <<EOF
+CREATE ROLE service_ops WITH LOGIN PASSWORD 'Ycb0zaTdhkybmF';
+CREATE DATABASE user_service;
+CREATE DATABASE inventory_service;
+CREATE DATABASE product_service;
+CREATE DATABASE order_service;
+CREATE DATABASE payment_service;
+
+for db in user_service inventory_service product_service order_service payment_service
+do
+  podman compose exec -it database "PGPASSWORD=zRSuuR1Pz9VdJB psql -U antman -d "$db" <<EOF
+    GRANT USAGE ON SCHEMA public TO service_ops;
+    GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO service_ops;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE ON TABLES TO service_ops;
+    exit && exit;
+  EOF"
+done
+```
