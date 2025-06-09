@@ -15,4 +15,8 @@ describe('UsersController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  describe('createUser', () => {
+    it('should create a user successfully', async () => {});
+  });
 });
