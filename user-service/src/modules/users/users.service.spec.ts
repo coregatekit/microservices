@@ -15,4 +15,20 @@ describe('UsersService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  describe('createUser', () => {
+    it('should create a user successfully', async () => {
+      const createUserDto = {
+        email: 'tester@example.com',
+        password: 'securepassword',
+        name: 'Test User',
+        phone: '123-456-7890',
+      };
+
+      const result = await service.createUser(createUserDto);
+
+      expect(result).toBeDefined();
+      expect(result.email).toBe(createUserDto.email);
+    });
+  });
 });
