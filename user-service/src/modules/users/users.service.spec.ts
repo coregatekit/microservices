@@ -55,4 +55,21 @@ describe('UsersService', () => {
       expect(result.email).toBe(createUserDto.email);
     });
   });
+
+  it('should throw an error if user already exists', async () => {
+    mockDb.select = jest.fn().mockReturnThis();
+    mockDb.from = jest.fn().mockReturnThis();
+    mockDb.where = jest.fn().mockReturnValue([{ email: 'tester@example.com' }]);
+
+    const createUserDto = {
+      email: 'tester@example.com',
+      password: 'securepassword',
+      name: 'Test User',
+      phone: '123-456-7890',
+    };
+
+    await expect(service.createUser(createUserDto)).rejects.toThrow(
+      'User already exists',
+    );
+  });
 });
