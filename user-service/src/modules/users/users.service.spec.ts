@@ -1,12 +1,27 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
+import { DrizzleAsyncProvider } from '../../db/db.provider';
+import * as schema from '../../db/drizzle/schema';
+import { sql } from 'drizzle-orm';
+
+const mockDb = {
+  select: jest.fn(),
+  from: jest.fn(),
+  where: jest.fn(),
+};
 
 describe('UsersService', () => {
   let service: UsersService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UsersService],
+      providers: [
+        UsersService,
+        {
+          provide: DrizzleAsyncProvider,
+          useValue: mockDb,
+        },
+      ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
@@ -18,6 +33,10 @@ describe('UsersService', () => {
 
   describe('createUser', () => {
     it('should create a user successfully', async () => {
+      mockDb.select = jest.fn().mockReturnThis();
+      mockDb.from = jest.fn().mockReturnThis();
+      mockDb.where = jest.fn().mockReturnValue([]);
+
       const createUserDto = {
         email: 'tester@example.com',
         password: 'securepassword',
@@ -27,6 +46,11 @@ describe('UsersService', () => {
 
       const result = await service.createUser(createUserDto);
 
+      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockDb.from).toHaveBeenCalledWith(schema.users);
+      expect(mockDb.where).toHaveBeenCalledWith(
+        sql`${schema.users.email} = ${createUserDto.email}`,
+      );
       expect(result).toBeDefined();
       expect(result.email).toBe(createUserDto.email);
     });
