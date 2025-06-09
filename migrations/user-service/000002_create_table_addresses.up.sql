@@ -17,10 +17,6 @@ CREATE INDEX idx_addresses_user_id ON addresses (user_id);
 CREATE INDEX idx_addresses_type ON addresses (type);
 ALTER TABLE addresses
   ADD CONSTRAINT fk_addresses_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE;
--- Add a unique constraint to ensure that only one default address per user
-ALTER TABLE addresses
-  ADD CONSTRAINT uq_addresses_user_id_type UNIQUE (user_id, type, is_default)
-  WHERE is_default = true;
 -- Add a trigger to update the updated_at field on every update
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
