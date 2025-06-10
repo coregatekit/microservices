@@ -2,7 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
 
-const mockDb = {};
+const mockDb = {
+  query: {
+    users: {
+      findFirst: jest.fn(),
+    },
+  },
+};
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -26,16 +32,33 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    it('should return login response with access and refresh tokens', () => {
+    it('should return login response with access and refresh tokens', async () => {
       const email = 'john@example.com';
       const password = 'securepassword';
+      mockDb.query.users.findFirst.mockResolvedValue({
+        id: 'user-id',
+        email: 'john@example.com',
+        password: 'hashedPassword',
+        name: 'John Doe',
+      });
 
-      const result = service.login(email, password);
+      const result = await service.login(email, password);
 
       expect(result).toEqual({
         accessToken: 'mockAccessToken',
         refreshToken: 'mockRefreshToken',
       });
+    });
+
+    it('should throw an error if user does not exist', async () => {
+      const email = 'alice@example.com';
+      const password = 'securepassword';
+
+      mockDb.query.users.findFirst.mockResolvedValue(null);
+
+      await expect(service.login(email, password)).rejects.toThrow(
+        'User not found',
+      );
     });
   });
 });

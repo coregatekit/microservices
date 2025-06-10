@@ -11,7 +11,15 @@ export class AuthService {
     private readonly db: NodePgDatabase<typeof schema>,
   ) {}
 
-  login(email: string, password: string): LoginResponse {
+  async login(email: string, password: string): Promise<LoginResponse> {
+    const userExist = await this.db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.email, email),
+    });
+
+    if (!userExist) {
+      throw new Error('User not found');
+    }
+
     return {
       accessToken: 'mockAccessToken',
       refreshToken: 'mockRefreshToken',
