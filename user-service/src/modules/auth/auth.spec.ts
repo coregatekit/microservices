@@ -1,7 +1,35 @@
-import { Auth } from './auth';
+import { LoginRequest, LoginResponse } from './auth';
 
-describe('Auth', () => {
-  it('should be defined', () => {
-    expect(new Auth()).toBeDefined();
+describe('Auth Classes', () => {
+  describe('LoginRequest', () => {
+    it('should have email and password properties', () => {
+      const loginRequest = new LoginRequest();
+      expect(loginRequest).toHaveProperty('email');
+      expect(loginRequest).toHaveProperty('password');
+    });
+
+    it('should validate email format', () => {
+      const loginRequest = new LoginRequest();
+      loginRequest.email = 'john@example.com';
+      loginRequest.password = 'password123';
+      expect(loginRequest.email).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+      expect(loginRequest.password).toBe('password123');
+    });
+  });
+
+  describe('LoginResponse', () => {
+    it('should have accessToken and refreshToken properties', () => {
+      const loginResponse = new LoginResponse();
+      expect(loginResponse).toHaveProperty('accessToken');
+      expect(loginResponse).toHaveProperty('refreshToken');
+    });
+
+    it('should set accessToken and refreshToken', () => {
+      const loginResponse = new LoginResponse();
+      loginResponse.accessToken = 'someAccessToken';
+      loginResponse.refreshToken = 'someRefreshToken';
+      expect(loginResponse.accessToken).toBe('someAccessToken');
+      expect(loginResponse.refreshToken).toBe('someRefreshToken');
+    });
   });
 });
