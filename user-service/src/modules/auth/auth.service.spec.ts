@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
@@ -55,6 +56,9 @@ describe('AuthService', () => {
       expect(result).toEqual({
         accessToken: 'mockAccessToken',
         refreshToken: 'mockRefreshToken',
+      });
+      expect(mockDb.query.users.findFirst).toHaveBeenCalledWith({
+        where: expect.any(Function),
       });
     });
 
