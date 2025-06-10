@@ -1,6 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
+import * as argon2 from 'argon2';
+
+jest.mock('argon2', () => ({
+  verify: jest.fn(),
+}));
 
 const mockDb = {
   query: {
@@ -25,6 +30,8 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -76,6 +83,30 @@ describe('AuthService', () => {
       await expect(service.login(email, password)).rejects.toThrow(
         'Invalid password',
       );
+    });
+  });
+
+  describe('verifyPassword', () => {
+    it('should return true for valid password', async () => {
+      const password = 'securepassword';
+      const hashedPassword = 'hashedPassword';
+
+      (argon2.verify as jest.Mock).mockResolvedValue(true);
+
+      const result = await service.verifyPassword(password, hashedPassword);
+      expect(result).toBe(true);
+      expect(argon2.verify).toHaveBeenCalledWith(hashedPassword, password);
+    });
+
+    it('should return false for invalid password', async () => {
+      const password = 'wrongpassword';
+      const hashedPassword = 'hashedPassword';
+
+      (argon2.verify as jest.Mock).mockResolvedValue(false);
+
+      const result = await service.verifyPassword(password, hashedPassword);
+      expect(result).toBe(false);
+      expect(argon2.verify).toHaveBeenCalledWith(hashedPassword, password);
     });
   });
 });
