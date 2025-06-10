@@ -5,6 +5,7 @@ import * as schema from '../../db/drizzle/schema';
 import { LoginResponse } from './auth';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,8 @@ export class AuthService {
     private readonly db: NodePgDatabase<typeof schema>,
     @Inject(JwtService)
     private readonly jwtService: JwtService,
+    @Inject(ConfigService)
+    private readonly configService: ConfigService,
   ) {}
 
   async login(email: string, password: string): Promise<LoginResponse> {
