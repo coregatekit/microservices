@@ -4,6 +4,7 @@ import { HealthModule } from './modules/health/health.module';
 import { DbModule } from './db/db.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
+import { AddressesModule } from './modules/addresses/addresses.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { AuthModule } from './modules/auth/auth.module';
     DbModule,
     ConfigModule.forRoot(),
     AuthModule,
+    AddressesModule,
   ],
   controllers: [],
   providers: [],
