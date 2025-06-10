@@ -11,12 +11,10 @@ export class AuthController {
   }
 
   @Post('login')
-  login(@Body() loginRequest: LoginRequest): LoginResponse {
-    console.log('Login request received:', loginRequest);
-
-    return {
-      accessToken: 'mockAccessToken',
-      refreshToken: 'mockRefreshToken',
-    };
+  async login(@Body() loginRequest: LoginRequest): Promise<LoginResponse> {
+    return await this.authService.login(
+      loginRequest.email,
+      loginRequest.password,
+    );
   }
 }
