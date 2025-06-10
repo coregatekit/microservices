@@ -58,7 +58,12 @@ export class AuthService {
     };
 
     return {
-      accessToken: await this.jwtService.signAsync(payload),
+      accessToken: await this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('JWT_SECRET'),
+        expiresIn: this.configService.get<string>('JWT_EXPIRATION_TIME', '1h'),
+        audience: this.configService.get<string>('JWT_AUDIENCE', 'users'),
+        issuer: this.configService.get<string>('JWT_ISSUER', 'auth-service'),
+      }),
       refreshToken: 'mockRefreshToken', // Replace with actual refresh token logic if needed
     };
   }
