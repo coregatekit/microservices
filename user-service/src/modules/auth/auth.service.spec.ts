@@ -16,7 +16,9 @@ const mockDb = {
     },
   },
 };
-const mockJwtService = {};
+const mockJwtService = {
+  signAsync: jest.fn(),
+};
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -56,6 +58,7 @@ describe('AuthService', () => {
         name: 'John Doe',
       });
       service.verifyPassword = jest.fn().mockResolvedValue(true);
+      mockJwtService.signAsync.mockResolvedValue('mockAccessToken');
 
       const result = await service.login(email, password);
 
@@ -117,6 +120,23 @@ describe('AuthService', () => {
       const result = await service.verifyPassword(password, hashedPassword);
       expect(result).toBe(false);
       expect(argon2.verify).toHaveBeenCalledWith(hashedPassword, password);
+    });
+  });
+
+  describe('signToken', () => {
+    it('should return a login response with access and refresh tokens', async () => {
+      const data = {
+        userId: 'user-id',
+        email: 'john@example.com',
+        name: 'John Doe',
+      };
+
+      mockJwtService.signAsync.mockResolvedValue('mockAccessToken');
+      const result = await service.signToken(data);
+      expect(result).toEqual({
+        accessToken: 'mockAccessToken',
+        refreshToken: 'mockRefreshToken',
+      });
     });
   });
 });

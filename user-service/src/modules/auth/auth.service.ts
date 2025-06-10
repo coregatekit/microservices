@@ -33,10 +33,11 @@ export class AuthService {
       throw new Error('Invalid password');
     }
 
-    return {
-      accessToken: 'mockAccessToken',
-      refreshToken: 'mockRefreshToken',
-    };
+    return this.signToken({
+      ['userId']: userExist.id,
+      ['email']: userExist.email,
+      ['name']: userExist.name,
+    });
   }
 
   async verifyPassword(
@@ -44,5 +45,18 @@ export class AuthService {
     hashedPassword: string,
   ): Promise<boolean> {
     return await argon.verify(hashedPassword, password);
+  }
+
+  async signToken(data: Record<string, string> = {}): Promise<LoginResponse> {
+    const payload = {
+      sub: data['userId'],
+      email: data['email'],
+      name: data['name'],
+    };
+
+    return {
+      accessToken: await this.jwtService.signAsync(payload),
+      refreshToken: 'mockRefreshToken', // Replace with actual refresh token logic if needed
+    };
   }
 }
