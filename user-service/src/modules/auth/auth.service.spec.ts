@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
 import * as argon2 from 'argon2';
+import { JwtService } from '@nestjs/jwt';
 
 jest.mock('argon2', () => ({
   verify: jest.fn(),
@@ -15,6 +16,7 @@ const mockDb = {
     },
   },
 };
+const mockJwtService = {};
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -26,6 +28,10 @@ describe('AuthService', () => {
         {
           provide: DrizzleAsyncProvider,
           useValue: mockDb,
+        },
+        {
+          provide: JwtService,
+          useValue: mockJwtService,
         },
       ],
     }).compile();
