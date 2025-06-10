@@ -41,6 +41,7 @@ describe('AuthService', () => {
         password: 'hashedPassword',
         name: 'John Doe',
       });
+      service.verifyPassword = jest.fn().mockResolvedValue(true);
 
       const result = await service.login(email, password);
 
@@ -58,6 +59,22 @@ describe('AuthService', () => {
 
       await expect(service.login(email, password)).rejects.toThrow(
         'User not found',
+      );
+    });
+
+    it('should throw an error if password is invalid', async () => {
+      const email = 'alice@example.com';
+      const password = 'wrongpassword';
+      mockDb.query.users.findFirst.mockResolvedValue({
+        id: 'user-id',
+        email: 'alice@example.com',
+        password: 'hashedPassword',
+        name: 'Alice Doe',
+      });
+
+      service.verifyPassword = jest.fn().mockResolvedValue(false);
+      await expect(service.login(email, password)).rejects.toThrow(
+        'Invalid password',
       );
     });
   });
