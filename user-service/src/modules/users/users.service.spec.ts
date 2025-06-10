@@ -53,9 +53,9 @@ describe('UsersService', () => {
       ]);
 
       const createUserDto = {
-        email: 'tester@example.com',
+        email: 'john@example.com',
         password: 'securepassword',
-        name: 'Test User',
+        name: 'John Doe',
         phone: '123-456-7890',
       };
 

@@ -42,15 +42,13 @@ export class UsersService {
         updatedAt: schema.users.updatedAt,
       });
 
-    const userResponse: UserResponse = {
-      id: '1',
-      email: createUserDto.email,
-      name: createUserDto.name,
-      phone: createUserDto.phone,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    return {
+      id: result[0].id,
+      email: result[0].email,
+      name: result[0].name,
+      phone: result[0].phone || undefined,
+      createdAt: new Date(result[0].createdAt),
+      updatedAt: new Date(result[0].updatedAt),
     };
-
-    return Promise.resolve(userResponse);
   }
 }
