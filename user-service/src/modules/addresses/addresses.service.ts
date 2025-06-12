@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
 import * as schema from '../../db/drizzle/schema';
@@ -26,6 +26,14 @@ export class AddressesService {
     } = data;
 
     try {
+      const userExist = await this.db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.id, userId),
+      });
+
+      if (!userExist) {
+        throw new BadRequestException(`User with ID ${userId} does not exist`);
+      }
+
       const result = await this.db
         .insert(schema.addresses)
         .values({
