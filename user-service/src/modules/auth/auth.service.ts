@@ -1,4 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
 import * as schema from '../../db/drizzle/schema';
@@ -24,7 +29,7 @@ export class AuthService {
     });
 
     if (!userExist) {
-      throw new Error('User not found');
+      throw new BadRequestException('User not found');
     }
 
     const isPasswordValid = await this.verifyPassword(
@@ -33,7 +38,7 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new Error('Invalid password');
+      throw new UnauthorizedException('Invalid password');
     }
 
     return this.signToken({
