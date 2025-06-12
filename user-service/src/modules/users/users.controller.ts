@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { CreateUserDto } from './users';
 import { UsersService } from './users.service';
 import { UserResponse } from './users.interface';
 import { Public } from '../../decorators/public';
+import { HttpResponse } from '../../common/http-response';
+import { ResultStatus } from 'src/common/enum/result';
 
 @Controller('users')
 export class UsersController {
@@ -13,11 +15,24 @@ export class UsersController {
   }
 
   @Public()
+  @HttpCode(201)
   @Post('register')
   async createUser(
     @Body() createUserDto: CreateUserDto,
-  ): Promise<UserResponse> {
-    return await this.usersService.createUser(createUserDto);
+  ): Promise<HttpResponse<UserResponse>> {
+    try {
+      return {
+        status: ResultStatus.SUCCESS,
+        message: 'User created successfully',
+        data: await this.usersService.createUser(createUserDto),
+      };
+    } catch (error) {
+      console.error('Error creating user:', error);
+      return {
+        status: ResultStatus.ERROR,
+        message: 'Failed to create user',
+      };
+    }
   }
 
   @Get('me')
