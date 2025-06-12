@@ -1,5 +1,5 @@
 import * as schema from '../../db/drizzle/schema';
-import { Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './users';
 import { UserResponse } from './users.interface';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
@@ -21,7 +21,7 @@ export class UsersService {
       .where(sql`${schema.users.email} = ${createUserDto.email}`);
 
     if (userExists.length > 0) {
-      throw new Error('User already exists');
+      throw new ConflictException('User already exists');
     }
 
     const hashedPassword = await argon.hash(createUserDto.password);
