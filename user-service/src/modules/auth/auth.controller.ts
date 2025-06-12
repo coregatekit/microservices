@@ -2,8 +2,8 @@ import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { LoginRequest, LoginResponse } from './auth';
 import { AuthService } from './auth.service';
 import { Public } from '../../decorators/public';
-import { HttpResponse } from 'src/common/http-response';
-import { ResultStatus } from 'src/common/enum/result';
+import { HttpResponse } from '../../common/http-response';
+import { ResultStatus } from '../../common/enum/result';
 
 @Controller('auth')
 export class AuthController {

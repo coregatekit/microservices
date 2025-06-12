@@ -4,7 +4,7 @@ import { UsersService } from './users.service';
 import { UserResponse } from './users.interface';
 import { Public } from '../../decorators/public';
 import { HttpResponse } from '../../common/http-response';
-import { ResultStatus } from 'src/common/enum/result';
+import { ResultStatus } from '../../common/enum/result';
 
 @Controller('users')
 export class UsersController {
