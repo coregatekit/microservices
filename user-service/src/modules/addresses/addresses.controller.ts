@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { AddressesService } from './addresses.service';
 import { AddAddressDto } from './addresses';
 import { ResultStatus } from '../..//common/enum/result';
@@ -12,6 +12,7 @@ export class AddressesController {
     this.addressesService = addressesService;
   }
 
+  @HttpCode(201)
   @Post()
   async addNewAddress(
     @Body() addressData: AddAddressDto,
