@@ -86,6 +86,54 @@ describe('UsersService', () => {
     });
   });
 
+  it('should create a user with optional phone number', async () => {
+    mockDb.select = jest.fn().mockReturnThis();
+    mockDb.from = jest.fn().mockReturnThis();
+    mockDb.where = jest.fn().mockReturnValue([]);
+    mockDb.insert = jest.fn().mockReturnThis();
+    mockDb.values = jest.fn().mockReturnThis();
+    mockDb.returning = jest.fn().mockResolvedValue([
+      {
+        id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
+        email: 'john@example.com',
+        name: 'John Doe',
+        createdAt: new Date('2025-06-12T00:00:00Z'),
+        updatedAt: new Date('2025-06-12T00:00:00Z'),
+      },
+    ]);
+
+    const createUserDto = {
+      email: 'john@example.com',
+      password: 'securepassword',
+      name: 'John Doe',
+    };
+
+    const result = await service.createUser(createUserDto);
+
+    expect(mockDb.select).toHaveBeenCalled();
+    expect(mockDb.from).toHaveBeenCalledWith(schema.users);
+    expect(mockDb.where).toHaveBeenCalledWith(
+      sql`${schema.users.email} = ${createUserDto.email}`,
+    );
+    expect(mockDb.insert).toHaveBeenCalledWith(schema.users);
+    expect(mockDb.values).toHaveBeenCalledWith({
+      email: createUserDto.email,
+      name: createUserDto.name,
+      password: expect.any(String) as string,
+    });
+    expect(mockDb.returning).toHaveBeenCalledWith({
+      id: schema.users.id,
+      email: schema.users.email,
+      name: schema.users.name,
+      phone: schema.users.phone,
+      createdAt: schema.users.createdAt,
+      updatedAt: schema.users.updatedAt,
+    });
+    expect(result).toBeDefined();
+    expect(result.email).toBe(createUserDto.email);
+    expect(result.phone).toBeUndefined();
+  });
+
   it('should throw an error if user already exists', async () => {
     mockDb.select = jest.fn().mockReturnThis();
     mockDb.from = jest.fn().mockReturnThis();

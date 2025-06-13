@@ -1,30 +1,48 @@
 import * as schema from '../../db/drizzle/schema';
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './users';
 import { UserResponse } from './users.interface';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { sql } from 'drizzle-orm';
 import * as argon from 'argon2';
+import { DataMasker } from '../../common/data-mask';
 
 @Injectable()
 export class UsersService {
+  private readonly logger: Logger;
+
   constructor(
     @Inject(DrizzleAsyncProvider)
     private readonly db: NodePgDatabase<typeof schema>,
-  ) {}
+  ) {
+    this.logger = new Logger(UsersService.name);
+  }
 
   async createUser(createUserDto: CreateUserDto): Promise<UserResponse> {
+    this.logger.log(
+      `Creating user with email: ${DataMasker.mask(createUserDto.email)}`,
+    );
     const userExists = await this.db
       .select()
       .from(schema.users)
       .where(sql`${schema.users.email} = ${createUserDto.email}`);
 
     if (userExists.length > 0) {
+      this.logger.warn(
+        `User with email ${DataMasker.mask(createUserDto.email)} already exists`,
+      );
       throw new ConflictException('User already exists');
     }
 
+    this.logger.log(
+      `Hashing password for user: ${DataMasker.mask(createUserDto.email)}`,
+    );
     const hashedPassword = await argon.hash(createUserDto.password);
+
+    this.logger.log(
+      `Inserting new user into database: ${DataMasker.mask(createUserDto.email)}`,
+    );
     const result = await this.db
       .insert(schema.users)
       .values({
@@ -42,6 +60,7 @@ export class UsersService {
         updatedAt: schema.users.updatedAt,
       });
 
+    this.logger.log(`User created successfully with ID: ${result[0].id}`);
     return {
       id: result[0].id,
       email: result[0].email,
