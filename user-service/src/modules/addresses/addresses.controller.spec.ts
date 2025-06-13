@@ -50,7 +50,9 @@ describe('AddressesController', () => {
         addressData,
       );
       expect(result).toEqual({
-        id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
+        status: 'success',
+        message: 'Address added successfully',
+        data: { id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3' },
       });
     });
   });
