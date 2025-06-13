@@ -15,10 +15,11 @@ import { ResultStatus } from '../../common/enum/result';
 @Controller('auth')
 export class AuthController {
   private readonly authService: AuthService;
-  private readonly logger: Logger = new Logger(AuthController.name);
+  private readonly logger: Logger;
 
   constructor(authService: AuthService) {
     this.authService = authService;
+    this.logger = new Logger(AuthController.name);
   }
 
   @Public()

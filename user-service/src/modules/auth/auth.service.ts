@@ -1,7 +1,8 @@
 import {
-  BadRequestException,
   Inject,
   Injectable,
+  Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -11,9 +12,11 @@ import { LoginResponse } from './auth';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { DataMasker } from '../../common/data-mask';
 
 @Injectable()
 export class AuthService {
+  private readonly logger: Logger;
   constructor(
     @Inject(DrizzleAsyncProvider)
     private readonly db: NodePgDatabase<typeof schema>,
@@ -21,7 +24,9 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @Inject(ConfigService)
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    this.logger = new Logger(AuthService.name);
+  }
 
   async login(email: string, password: string): Promise<LoginResponse> {
     const userExist = await this.db.query.users.findFirst({
@@ -29,7 +34,8 @@ export class AuthService {
     });
 
     if (!userExist) {
-      throw new BadRequestException('User not found');
+      this.logger.warn(`User with email ${DataMasker.mask(email)} not found`);
+      throw new NotFoundException('User not found');
     }
 
     const isPasswordValid = await this.verifyPassword(
@@ -38,6 +44,9 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
+      this.logger.warn(
+        `Invalid password for user with email ${DataMasker.mask(email)}`,
+      );
       throw new UnauthorizedException('Invalid password');
     }
 
