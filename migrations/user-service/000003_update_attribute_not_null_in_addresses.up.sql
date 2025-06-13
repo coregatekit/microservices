@@ -1,0 +1,4 @@
+ALTER TABLE addresses 
+    ALTER COLUMN state SET NOT NULL,
+    ALTER COLUMN postal_code SET NOT NULL,
+    ALTER COLUMN is_default SET NOT NULL;
