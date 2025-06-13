@@ -4,6 +4,11 @@ import { DrizzleAsyncProvider } from '../../db/db.provider';
 import { AddAddressDto } from './addresses';
 
 const mockDb = {
+  query: {
+    users: {
+      findFirst: jest.fn(),
+    },
+  },
   insert: jest.fn(),
   values: jest.fn(),
   returning: jest.fn(),
@@ -44,6 +49,9 @@ describe('AddressesService', () => {
         isDefault: true,
       };
 
+      mockDb.query.users.findFirst = jest.fn().mockResolvedValue({
+        id: 'user123',
+      });
       mockDb.insert = jest.fn().mockReturnThis();
       mockDb.values = jest.fn().mockReturnThis();
       mockDb.returning = jest
@@ -68,6 +76,26 @@ describe('AddressesService', () => {
       expect(result).toEqual({ id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3' });
     });
 
+    it('should throw an error if user does not exist', async () => {
+      const addressData: AddAddressDto = {
+        userId: 'user123',
+        type: 'SHIPPING',
+        addressLine1: '123 Main St',
+        addressLine2: 'Apt 4B',
+        city: 'Springfield',
+        state: 'IL',
+        postalCode: '62701',
+        country: 'USA',
+        isDefault: true,
+      };
+
+      mockDb.query.users.findFirst = jest.fn().mockResolvedValue(null);
+
+      await expect(service.addNewAddress(addressData)).rejects.toThrow(
+        `User with ID ${addressData.userId} does not exist`,
+      );
+    });
+
     it('should throw an error if address addition fails', async () => {
       const addressData: AddAddressDto = {
         userId: 'user123',
@@ -81,6 +109,9 @@ describe('AddressesService', () => {
         isDefault: true,
       };
 
+      mockDb.query.users.findFirst = jest.fn().mockResolvedValue({
+        id: 'user123',
+      });
       mockDb.insert = jest.fn().mockReturnThis();
       mockDb.values = jest.fn().mockReturnThis();
       mockDb.returning = jest
@@ -88,7 +119,7 @@ describe('AddressesService', () => {
         .mockRejectedValue(new Error('Database error'));
 
       await expect(service.addNewAddress(addressData)).rejects.toThrow(
-        'Failed to add address: Database error',
+        'Database error',
       );
     });
   });

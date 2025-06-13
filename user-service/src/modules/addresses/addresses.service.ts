@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
 import * as schema from '../../db/drizzle/schema';
@@ -7,10 +12,14 @@ import { AddAddressResponse } from './addresses.interface';
 
 @Injectable()
 export class AddressesService {
+  private readonly logger: Logger;
+
   constructor(
     @Inject(DrizzleAsyncProvider)
     private readonly db: NodePgDatabase<typeof schema>,
-  ) {}
+  ) {
+    this.logger = new Logger(AddressesService.name);
+  }
 
   async addNewAddress(data: AddAddressDto): Promise<AddAddressResponse> {
     const {
@@ -25,39 +34,39 @@ export class AddressesService {
       isDefault,
     } = data;
 
-    try {
-      const userExist = await this.db.query.users.findFirst({
-        where: (users, { eq }) => eq(users.id, userId),
+    this.logger.log('Checking if user exists for address creation');
+    const userExist = await this.db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.id, userId),
+    });
+
+    if (!userExist) {
+      this.logger.warn(
+        `User with ID ${userId} does not exist, cannot add address`,
+      );
+      throw new BadRequestException(`User with ID ${userId} does not exist`);
+    }
+
+    this.logger.log(`Adding new address for user ID: ${userId}, type: ${type}`);
+    const result = await this.db
+      .insert(schema.addresses)
+      .values({
+        userId,
+        type,
+        addressLine1,
+        addressLine2,
+        city,
+        state,
+        postalCode,
+        country,
+        isDefault,
+      })
+      .returning({
+        id: schema.addresses.id,
       });
 
-      if (!userExist) {
-        throw new BadRequestException(`User with ID ${userId} does not exist`);
-      }
-
-      const result = await this.db
-        .insert(schema.addresses)
-        .values({
-          userId,
-          type,
-          addressLine1,
-          addressLine2,
-          city,
-          state,
-          postalCode,
-          country,
-          isDefault,
-        })
-        .returning({
-          id: schema.addresses.id,
-        });
-
-      return { id: result[0].id };
-    } catch (error) {
-      console.error('Error adding address:', error);
-      if (error instanceof Error) {
-        throw new Error(`Failed to add address: ${error.message}`);
-      }
-      throw new Error('Failed to add address');
-    }
+    this.logger.log(
+      `Address added successfully for user ID: ${userId}, address ID: ${result[0].id}`,
+    );
+    return { id: result[0].id };
   }
 }
