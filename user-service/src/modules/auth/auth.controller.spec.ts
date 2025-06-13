@@ -45,7 +45,11 @@ describe('AuthController', () => {
 
       const result = await controller.login(loginRequest);
 
-      expect(result).toEqual(loginResponse);
+      expect(result).toEqual({
+        status: 'success',
+        message: 'Login successful',
+        data: loginResponse,
+      });
       expect(mockAuthService.login).toHaveBeenCalledWith(
         loginRequest.email,
         loginRequest.password,

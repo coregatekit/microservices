@@ -1,4 +1,11 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Post,
+} from '@nestjs/common';
 import { LoginRequest, LoginResponse } from './auth';
 import { AuthService } from './auth.service';
 import { Public } from '../../decorators/public';
@@ -8,34 +15,25 @@ import { ResultStatus } from '../../common/enum/result';
 @Controller('auth')
 export class AuthController {
   private readonly authService: AuthService;
+  private readonly logger: Logger = new Logger(AuthController.name);
 
   constructor(authService: AuthService) {
     this.authService = authService;
   }
 
   @Public()
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
     @Body() loginRequest: LoginRequest,
   ): Promise<HttpResponse<LoginResponse>> {
-    try {
-      return {
-        status: ResultStatus.SUCCESS,
-        message: 'Login successful',
-        data: await this.authService.login(
-          loginRequest.email,
-          loginRequest.password,
-        ),
-      };
-    } catch (error) {
-      console.error('Error during login:', error);
-      const errorMessage =
-        error instanceof Error ? error.message : 'Loin failed';
-      return {
-        status: ResultStatus.ERROR,
-        message: errorMessage,
-      };
-    }
+    return {
+      status: ResultStatus.SUCCESS,
+      message: 'Login successful',
+      data: await this.authService.login(
+        loginRequest.email,
+        loginRequest.password,
+      ),
+    };
   }
 }
