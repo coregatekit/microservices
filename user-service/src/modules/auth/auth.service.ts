@@ -29,6 +29,9 @@ export class AuthService {
   }
 
   async login(email: string, password: string): Promise<LoginResponse> {
+    this.logger.log(
+      `Checking credentials for user with email: ${DataMasker.mask(email)}`,
+    );
     const userExist = await this.db.query.users.findFirst({
       where: (users, { eq }) => eq(users.email, email),
     });
@@ -50,6 +53,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid password');
     }
 
+    this.logger.log(
+      `Password verified for user with email: ${DataMasker.mask(email)}`,
+    );
     return this.signToken({
       ['userId']: userExist.id,
       ['email']: userExist.email,
@@ -61,10 +67,12 @@ export class AuthService {
     password: string,
     hashedPassword: string,
   ): Promise<boolean> {
+    this.logger.log(`Verifying password...`);
     return await argon.verify(hashedPassword, password);
   }
 
   async signToken(data: Record<string, string> = {}): Promise<LoginResponse> {
+    this.logger.log('Signing token for user');
     const payload = {
       sub: data['userId'],
       email: data['email'],
