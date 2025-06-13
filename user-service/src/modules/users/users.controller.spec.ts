@@ -48,8 +48,8 @@ describe('UsersController', () => {
 
       const result = await controller.createUser(createUserDto);
 
-      expect(result.id).toBeDefined();
-      expect(result.email).toBe('john@example.com');
+      expect(result.data?.id).toBeDefined();
+      expect(result.data?.email).toBe('john@example.com');
       expect(mockUsersService.createUser).toHaveBeenCalledWith(createUserDto);
     });
 
