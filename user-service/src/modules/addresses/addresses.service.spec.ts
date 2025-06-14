@@ -5,22 +5,40 @@ import { AddAddressDto } from './addresses';
 import * as schema from '../../db/drizzle/schema';
 import { sql } from 'drizzle-orm';
 
-const mockDb = {
-  query: {
-    users: {
-      findFirst: jest.fn(),
-    },
-  },
-  select: jest.fn(),
-  from: jest.fn(),
-  where: jest.fn(),
-  insert: jest.fn(),
-  values: jest.fn(),
-  returning: jest.fn(),
-};
-
 describe('AddressesService', () => {
   let service: AddressesService;
+  const mockDb = {
+    query: {
+      users: {
+        findFirst: jest.fn(),
+      },
+    },
+    select: jest.fn().mockReturnThis(),
+    from: jest.fn().mockReturnThis(),
+    where: jest.fn(),
+    insert: jest.fn().mockReturnThis(),
+    values: jest.fn().mockReturnThis(),
+    returning: jest.fn(),
+  };
+
+  const testAddress: AddAddressDto = {
+    userId: 'user123',
+    type: 'SHIPPING',
+    addressLine1: '123 Main St',
+    addressLine2: 'Apt 4B',
+    city: 'Springfield',
+    state: 'IL',
+    postalCode: '62701',
+    country: 'USA',
+    isDefault: true,
+  };
+
+  const mockAddress = {
+    id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
+    ...testAddress,
+    createdAt: new Date('2025-06-12T00:00:00Z'),
+    updatedAt: new Date('2025-06-12T00:00:00Z'),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -41,89 +59,63 @@ describe('AddressesService', () => {
   });
 
   describe('addNewAddress', () => {
+    beforeEach(() => {
+      // Reset mocks for each test
+      mockDb.query.users.findFirst.mockReset();
+      mockDb.insert.mockReset();
+      mockDb.values.mockReset();
+      mockDb.returning.mockReset();
+    });
+
     it('should add a new address successfully', async () => {
-      const addressData: AddAddressDto = {
-        userId: 'user123',
-        type: 'SHIPPING',
-        addressLine1: '123 Main St',
-        addressLine2: 'Apt 4B',
-        city: 'Springfield',
-        state: 'IL',
-        postalCode: '62701',
-        country: 'USA',
-        isDefault: true,
-      };
-
-      mockDb.query.users.findFirst = jest.fn().mockResolvedValue({
-        id: 'user123',
+      // Arrange
+      mockDb.query.users.findFirst.mockResolvedValue({
+        id: testAddress.userId,
       });
-      mockDb.insert = jest.fn().mockReturnThis();
-      mockDb.values = jest.fn().mockReturnThis();
-      mockDb.returning = jest
-        .fn()
-        .mockResolvedValue([{ id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3' }]);
+      mockDb.insert.mockReturnValue(mockDb);
+      mockDb.values.mockReturnValue(mockDb);
+      mockDb.returning.mockResolvedValue([{ id: mockAddress.id }]);
 
-      const result = await service.addNewAddress(addressData);
+      // Act
+      const result = await service.addNewAddress(testAddress);
 
-      expect(result).toBeDefined();
+      // Assert
+      expect(result).toEqual({ id: mockAddress.id });
       expect(mockDb.insert).toHaveBeenCalledWith(expect.anything());
       expect(mockDb.values).toHaveBeenCalledWith({
-        userId: addressData.userId,
-        type: addressData.type,
-        addressLine1: addressData.addressLine1,
-        addressLine2: addressData.addressLine2,
-        city: addressData.city,
-        state: addressData.state,
-        postalCode: addressData.postalCode,
-        country: addressData.country,
-        isDefault: addressData.isDefault,
+        userId: testAddress.userId,
+        type: testAddress.type,
+        addressLine1: testAddress.addressLine1,
+        addressLine2: testAddress.addressLine2,
+        city: testAddress.city,
+        state: testAddress.state,
+        postalCode: testAddress.postalCode,
+        country: testAddress.country,
+        isDefault: testAddress.isDefault,
       });
-      expect(result).toEqual({ id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3' });
     });
 
     it('should throw an error if user does not exist', async () => {
-      const addressData: AddAddressDto = {
-        userId: 'user123',
-        type: 'SHIPPING',
-        addressLine1: '123 Main St',
-        addressLine2: 'Apt 4B',
-        city: 'Springfield',
-        state: 'IL',
-        postalCode: '62701',
-        country: 'USA',
-        isDefault: true,
-      };
+      // Arrange
+      mockDb.query.users.findFirst.mockResolvedValue(null);
 
-      mockDb.query.users.findFirst = jest.fn().mockResolvedValue(null);
-
-      await expect(service.addNewAddress(addressData)).rejects.toThrow(
-        `User with ID ${addressData.userId} does not exist`,
+      // Act & Assert
+      await expect(service.addNewAddress(testAddress)).rejects.toThrow(
+        `User with ID ${testAddress.userId} does not exist`,
       );
     });
 
     it('should throw an error if address addition fails', async () => {
-      const addressData: AddAddressDto = {
-        userId: 'user123',
-        type: 'SHIPPING',
-        addressLine1: '123 Main St',
-        addressLine2: 'Apt 4B',
-        city: 'Springfield',
-        state: 'IL',
-        postalCode: '62701',
-        country: 'USA',
-        isDefault: true,
-      };
-
-      mockDb.query.users.findFirst = jest.fn().mockResolvedValue({
-        id: 'user123',
+      // Arrange
+      mockDb.query.users.findFirst.mockResolvedValue({
+        id: testAddress.userId,
       });
-      mockDb.insert = jest.fn().mockReturnThis();
-      mockDb.values = jest.fn().mockReturnThis();
-      mockDb.returning = jest
-        .fn()
-        .mockRejectedValue(new Error('Database error'));
+      mockDb.insert.mockReturnValue(mockDb);
+      mockDb.values.mockReturnValue(mockDb);
+      mockDb.returning.mockRejectedValue(new Error('Database error'));
 
-      await expect(service.addNewAddress(addressData)).rejects.toThrow(
+      // Act & Assert
+      await expect(service.addNewAddress(testAddress)).rejects.toThrow(
         'Database error',
       );
     });
@@ -131,29 +123,22 @@ describe('AddressesService', () => {
 
   describe('getUserAddresses', () => {
     const userId = 'user123';
-    mockDb.select = jest.fn().mockReturnThis();
-    mockDb.from = jest.fn().mockReturnThis();
-    const mockAddress = {
-      id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
-      userId: 'user123',
-      type: 'SHIPPING',
-      addressLine1: '123 Main St',
-      addressLine2: 'Apt 4B',
-      city: 'Springfield',
-      state: 'IL',
-      postalCode: '62701',
-      country: 'USA',
-      isDefault: true,
-      createdAt: new Date('2025-06-12T00:00:00Z'),
-      updatedAt: new Date('2025-06-12T00:00:00Z'),
-    };
+
+    beforeEach(() => {
+      // Reset mocks for each test
+      mockDb.select.mockClear();
+      mockDb.from.mockClear();
+      mockDb.where.mockReset();
+    });
 
     it('should return a list of addresses for a user', async () => {
-      mockDb.where = jest.fn().mockReturnValue([mockAddress]);
+      // Arrange
+      mockDb.where.mockReturnValue([mockAddress]);
 
+      // Act
       const result = await service.getUserAddresses(userId);
 
-      expect(result).toBeDefined();
+      // Assert
       expect(result).toEqual([mockAddress]);
       expect(mockDb.select).toHaveBeenCalled();
       expect(mockDb.from).toHaveBeenCalledWith(schema.addresses);
@@ -163,35 +148,27 @@ describe('AddressesService', () => {
     });
 
     it('should throw an error if no addresses found for user', async () => {
-      mockDb.where = jest.fn().mockReturnValue([]);
+      // Arrange
+      mockDb.where.mockReturnValue([]);
 
+      // Act & Assert
       await expect(service.getUserAddresses(userId)).rejects.toThrow(
         `No addresses found for user ID: ${userId}`,
       );
     });
 
     it('should return partial addresses if some fields are missing', async () => {
-      const partialAddress = {
-        id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
-        userId: 'user123',
-        type: 'SHIPPING',
-        addressLine1: '123 Main St',
-        city: 'Springfield',
-        state: 'IL',
-        postalCode: '62701',
-        country: 'USA',
-        isDefault: true,
-        createdAt: new Date('2025-06-12T00:00:00Z'),
-        updatedAt: new Date('2025-06-12T00:00:00Z'),
-      };
+      // Arrange
+      const partialAddress = { ...mockAddress };
+      delete partialAddress.addressLine2;
+      mockDb.where.mockReturnValue([partialAddress]);
 
-      mockDb.where = jest.fn().mockReturnValue([partialAddress]);
-
+      // Act
       const result = await service.getUserAddresses(userId);
 
-      expect(result).toBeDefined();
-      expect(result).toEqual([partialAddress]);
+      // Assert
       expect(result[0].addressLine2).toBeUndefined();
+      expect(result).toEqual([partialAddress]);
     });
   });
 });
