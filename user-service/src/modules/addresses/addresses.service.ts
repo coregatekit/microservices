@@ -87,4 +87,32 @@ export class AddressesService {
     this.logger.log('Transforming address responses');
     return addresses.map((address) => transformAddressResponse(address));
   }
+
+  async getAddressById(
+    addressId: string,
+    userId: string,
+  ): Promise<AddressResponse> {
+    this.logger.log(
+      `Fetching address with ID: ${addressId} for user ID: ${userId}`,
+    );
+    const address = await this.db
+      .select()
+      .from(schema.addresses)
+      .where(
+        sql`${schema.addresses.id} = ${addressId} AND ${schema.addresses.userId} = ${userId}`,
+      )
+      .limit(1);
+
+    if (address.length === 0) {
+      this.logger.warn(
+        `Address with ID: ${addressId} not found for user ID: ${userId}`,
+      );
+      throw new NotFoundException(
+        `Address with ID: ${addressId} not found for user ID: ${userId}`,
+      );
+    }
+
+    this.logger.log('Transforming address response');
+    return transformAddressResponse(address[0]);
+  }
 }

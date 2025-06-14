@@ -16,6 +16,7 @@ describe('AddressesService', () => {
     select: jest.fn().mockReturnThis(),
     from: jest.fn().mockReturnThis(),
     where: jest.fn(),
+    limit: jest.fn(),
     insert: jest.fn().mockReturnThis(),
     values: jest.fn().mockReturnThis(),
     returning: jest.fn(),
@@ -169,6 +170,61 @@ describe('AddressesService', () => {
       // Assert
       expect(result[0].addressLine2).toBeUndefined();
       expect(result).toEqual([partialAddress]);
+    });
+  });
+
+  describe('getAddressById', () => {
+    const addressId = 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3';
+    const userId = 'user123';
+
+    beforeEach(() => {
+      // Reset mocks for each test
+      mockDb.select.mockClear();
+      mockDb.from.mockClear();
+      mockDb.where.mockReset();
+    });
+
+    it('should return an address by ID for a user', async () => {
+      // Arrange
+      mockDb.where.mockReturnThis();
+      mockDb.limit.mockReturnValue([mockAddress]);
+
+      // Act
+      const result = await service.getAddressById(addressId, userId);
+
+      // Assert
+      expect(result).toEqual(mockAddress);
+      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockDb.from).toHaveBeenCalledWith(schema.addresses);
+      expect(mockDb.where).toHaveBeenCalledWith(
+        sql`${schema.addresses.id} = ${addressId} AND ${schema.addresses.userId} = ${userId}`,
+      );
+    });
+
+    it('should throw an error if address not found for user', async () => {
+      // Arrange
+      mockDb.where.mockReturnThis();
+      mockDb.limit.mockReturnValue([]);
+
+      // Act & Assert
+      await expect(service.getAddressById(addressId, userId)).rejects.toThrow(
+        `Address with ID: ${addressId} not found for user ID: ${userId}`,
+      );
+    });
+
+    it('should return partial address if some fields are missing', async () => {
+      // Arrange
+      const partialAddress = { ...mockAddress };
+      delete partialAddress.addressLine2;
+      mockDb.where.mockReturnThis();
+      mockDb.limit.mockReturnValue([partialAddress]);
+
+      // Act
+      const result = await service.getAddressById(addressId, userId);
+
+      // Assert
+      expect(result.addressLine2).toBeUndefined();
+      expect(result).toEqual(partialAddress);
     });
   });
 });
