@@ -10,7 +10,7 @@ up:
 	if [ "$$version" = "a" ]; then \
 		migrate -database $(dbUrl) -path . up; \
 	else \
-		migrate -database $(dbUrl) -path . up $(version); \
+		migrate -database $(dbUrl) -path . up $$version; \
 	fi
 
 down:
@@ -18,5 +18,5 @@ down:
 	if [ "$$version" = "a" ]; then \
 		migrate -database $(dbUrl) -path . down; \
 	else \
-		migrate -database $(dbUrl) -path . down $(version); \
+		migrate -database $(dbUrl) -path . down $$version; \
 	fi
