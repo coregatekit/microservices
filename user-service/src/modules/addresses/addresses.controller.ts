@@ -40,7 +40,7 @@ export class AddressesController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get(':userId')
+  @Get('user/:userId')
   async getUserAddresses(
     @Param('userId') userId: string,
   ): Promise<HttpResponse<AddressResponse[]>> {
@@ -49,6 +49,20 @@ export class AddressesController {
       status: ResultStatus.SUCCESS,
       message: 'Addresses retrieved successfully',
       data: await this.addressesService.getUserAddresses(userId),
+    };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('user/:userId/:addressId')
+  async getAddressDetail(
+    @Param('userId') userId: string,
+    @Param('addressId') addressId: string,
+  ): Promise<HttpResponse<AddressResponse>> {
+    this.logger.log('Incoming request to get all addresses');
+    return {
+      status: ResultStatus.SUCCESS,
+      message: 'Address retrieved successfully',
+      data: await this.addressesService.getAddressById(userId, addressId),
     };
   }
 }
