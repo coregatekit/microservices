@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Logger,
   Param,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { AddressesService } from './addresses.service';
@@ -63,6 +64,48 @@ export class AddressesController {
       status: ResultStatus.SUCCESS,
       message: 'Address retrieved successfully',
       data: await this.addressesService.getAddressById(userId, addressId),
+    };
+  }
+
+  @HttpCode(HttpStatus.NOT_IMPLEMENTED)
+  @Get('user/:userId/default')
+  async getDefaultAddress(
+    @Param('userId') userId: string,
+  ): Promise<HttpResponse<AddressResponse>> {
+    this.logger.log(`Incoming request to get default address for user: ${userId}`);
+    return {
+      status: ResultStatus.ERROR,
+      message: 'The functionality is not implemented yet',
+    };
+  }
+
+  @HttpCode(HttpStatus.NOT_IMPLEMENTED)
+  @Patch('user/:userId/:addressId/update')
+  async updateAddress(
+    @Param('userId') userId: string,
+    @Param('addressId') addressId: string,
+  ): Promise<HttpResponse<{ id: string }>> {
+    this.logger.log(
+      `Incoming request to update address for user: ${userId}, addressId: ${addressId}`,
+    );
+    return {
+      status: ResultStatus.ERROR,
+      message: 'The functionality is not implemented yet',
+    };
+  }
+
+  @HttpCode(HttpStatus.NOT_IMPLEMENTED)
+  @Patch('user/:userId/:addressId/default')
+  async setDefaultAddress(
+    @Param('userId') userId: string,
+    @Param('addressId') addressId: string,
+  ): Promise<HttpResponse<{ id: string }>> {
+    this.logger.log(
+      `Incoming request to set default address for user: ${userId}, addressId: ${addressId}`,
+    );
+    return {
+      status: ResultStatus.ERROR,
+      message: 'The functionality is not implemented yet',
     };
   }
 }
