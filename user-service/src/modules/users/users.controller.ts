@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   HttpStatus,
   Logger,
@@ -39,10 +38,5 @@ export class UsersController {
       message: 'User created successfully',
       data: await this.usersService.createUser(createUserDto),
     };
-  }
-
-  @Get('me')
-  getMe(): string {
-    return 'This is the user profile endpoint';
   }
 }
