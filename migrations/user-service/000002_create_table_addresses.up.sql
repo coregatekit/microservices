@@ -5,10 +5,10 @@ CREATE TABLE addresses (
   address_line1 VARCHAR(255) NOT NULL,
   address_line2 VARCHAR(255),
   city VARCHAR(100) NOT NULL,
-  state VARCHAR(100),
-  postal_code VARCHAR(20),
+  state VARCHAR(100) NOT NULL,
+  postal_code VARCHAR(20) NOT NULL,
   country VARCHAR(100) NOT NULL,
-  is_default BOOLEAN DEFAULT false,
+  is_default BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc'),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
 );
