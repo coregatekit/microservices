@@ -1,7 +1,5 @@
 import {
   pgTable,
-  bigint,
-  boolean,
   index,
   unique,
   uuid,
@@ -9,14 +7,10 @@ import {
   timestamp,
   foreignKey,
   check,
+  boolean,
+  bigint,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-
-export const schemaMigrations = pgTable('schema_migrations', {
-  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-  version: bigint({ mode: 'number' }).primaryKey().notNull(),
-  dirty: boolean().notNull(),
-});
 
 export const users = pgTable(
   'users',
@@ -51,10 +45,10 @@ export const addresses = pgTable(
     addressLine1: varchar('address_line1', { length: 255 }).notNull(),
     addressLine2: varchar('address_line2', { length: 255 }),
     city: varchar({ length: 100 }).notNull(),
-    state: varchar({ length: 100 }),
-    postalCode: varchar('postal_code', { length: 20 }),
+    state: varchar({ length: 100 }).notNull(),
+    postalCode: varchar('postal_code', { length: 20 }).notNull(),
     country: varchar({ length: 100 }).notNull(),
-    isDefault: boolean('is_default').default(false),
+    isDefault: boolean('is_default').default(false).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
       .default(sql`(now() AT TIME ZONE 'utc'::text)`)
       .notNull(),
@@ -82,3 +76,9 @@ export const addresses = pgTable(
     ),
   ],
 );
+
+export const schemaMigrations = pgTable('schema_migrations', {
+  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
+  version: bigint({ mode: 'number' }).primaryKey().notNull(),
+  dirty: boolean().notNull(),
+});
