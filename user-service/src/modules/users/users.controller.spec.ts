@@ -3,15 +3,16 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './users';
 
-const mockUsersService = {
-  createUser: jest.fn(),
-};
-
 describe('UsersController', () => {
   let controller: UsersController;
-  let usersService: UsersService;
+
+  const mockUsersService = {
+    createUser: jest.fn(),
+  };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [
@@ -23,7 +24,6 @@ describe('UsersController', () => {
     }).compile();
 
     controller = module.get<UsersController>(UsersController);
-    usersService = module.get<UsersService>(UsersService);
   });
 
   it('should be defined', () => {
@@ -31,42 +31,40 @@ describe('UsersController', () => {
   });
 
   describe('createUser', () => {
+    const createUserDto: CreateUserDto = {
+      email: 'john@example.com',
+      password: 'password',
+      name: 'John Doe',
+    };
+
+    const mockUser = {
+      id: '1',
+      email: 'john@example.com',
+      name: 'John Doe',
+      phone: undefined,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
     it('should create a user successfully', async () => {
-      const createUserDto: CreateUserDto = {
-        email: 'john@example.com',
-        password: 'password',
-        name: 'John Doe',
-      };
-      usersService.createUser = jest.fn().mockResolvedValue({
-        id: '1',
-        email: createUserDto.email,
-        name: createUserDto.name,
-        phone: createUserDto.phone,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+      mockUsersService.createUser.mockResolvedValue(mockUser);
 
       const result = await controller.createUser(createUserDto);
 
-      expect(result.data?.id).toBeDefined();
-      expect(result.data?.email).toBe('john@example.com');
+      expect(result.data).toEqual(mockUser);
       expect(mockUsersService.createUser).toHaveBeenCalledWith(createUserDto);
+      expect(mockUsersService.createUser).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error if user creation fails', async () => {
-      const createUserDto: CreateUserDto = {
-        email: '',
-        password: 'password',
-        name: 'John Doe',
-      };
-      usersService.createUser = jest
-        .fn()
-        .mockRejectedValue(new Error('User creation failed'));
+      const errorMessage = 'User creation failed';
+      mockUsersService.createUser.mockRejectedValue(new Error(errorMessage));
 
       await expect(controller.createUser(createUserDto)).rejects.toThrow(
-        'User creation failed',
+        errorMessage,
       );
       expect(mockUsersService.createUser).toHaveBeenCalledWith(createUserDto);
+      expect(mockUsersService.createUser).toHaveBeenCalledTimes(1);
     });
   });
 });

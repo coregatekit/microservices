@@ -1,20 +1,20 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
 import * as schema from '../../db/drizzle/schema';
 import { sql } from 'drizzle-orm';
 
-const mockDb = {
-  select: jest.fn(),
-  from: jest.fn(),
-  where: jest.fn(),
-  insert: jest.fn(),
-  values: jest.fn(),
-  returning: jest.fn(),
-};
-
 describe('UsersService', () => {
   let service: UsersService;
+  const mockDb = {
+    select: jest.fn().mockReturnThis(),
+    from: jest.fn().mockReturnThis(),
+    where: jest.fn(),
+    insert: jest.fn().mockReturnThis(),
+    values: jest.fn().mockReturnThis(),
+    returning: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -35,22 +35,22 @@ describe('UsersService', () => {
   });
 
   describe('createUser', () => {
-    it('should create a user successfully', async () => {
-      mockDb.select = jest.fn().mockReturnThis();
-      mockDb.from = jest.fn().mockReturnThis();
-      mockDb.where = jest.fn().mockReturnValue([]);
-      mockDb.insert = jest.fn().mockReturnThis();
-      mockDb.values = jest.fn().mockReturnThis();
-      mockDb.returning = jest.fn().mockResolvedValue([
-        {
-          id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
-          email: 'john@example.com',
-          name: 'John Doe',
-          phone: '123-456-7890',
-          createdAt: new Date('2025-06-12T00:00:00Z'),
-          updatedAt: new Date('2025-06-12T00:00:00Z'),
-        },
-      ]);
+    const mockUserResponse = {
+      id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
+      email: 'john@example.com',
+      name: 'John Doe',
+      createdAt: new Date('2025-06-12T00:00:00Z'),
+      updatedAt: new Date('2025-06-12T00:00:00Z'),
+    };
+
+    const setupMockDbSuccess = (response: any) => {
+      mockDb.where.mockReturnValue([]);
+      mockDb.returning.mockResolvedValue([response]);
+    };
+
+    it('should create a user successfully with all fields', async () => {
+      const userWithPhone = { ...mockUserResponse, phone: '123-456-7890' };
+      setupMockDbSuccess(userWithPhone);
 
       const createUserDto = {
         email: 'john@example.com',
@@ -70,7 +70,7 @@ describe('UsersService', () => {
       expect(mockDb.values).toHaveBeenCalledWith({
         email: createUserDto.email,
         name: createUserDto.name,
-        password: expect.any(String) as string,
+        password: expect.any(String), // Password should be hashed in actual implementation
         phone: createUserDto.phone,
       });
       expect(mockDb.returning).toHaveBeenCalledWith({
@@ -83,71 +83,43 @@ describe('UsersService', () => {
       });
       expect(result).toBeDefined();
       expect(result.email).toBe(createUserDto.email);
+      expect(result.phone).toBe(createUserDto.phone);
     });
-  });
 
-  it('should create a user with optional phone number', async () => {
-    mockDb.select = jest.fn().mockReturnThis();
-    mockDb.from = jest.fn().mockReturnThis();
-    mockDb.where = jest.fn().mockReturnValue([]);
-    mockDb.insert = jest.fn().mockReturnThis();
-    mockDb.values = jest.fn().mockReturnThis();
-    mockDb.returning = jest.fn().mockResolvedValue([
-      {
-        id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
+    it('should create a user with optional phone number', async () => {
+      setupMockDbSuccess(mockUserResponse);
+
+      const createUserDto = {
         email: 'john@example.com',
+        password: 'securepassword',
         name: 'John Doe',
-        createdAt: new Date('2025-06-12T00:00:00Z'),
-        updatedAt: new Date('2025-06-12T00:00:00Z'),
-      },
-    ]);
+      };
 
-    const createUserDto = {
-      email: 'john@example.com',
-      password: 'securepassword',
-      name: 'John Doe',
-    };
+      const result = await service.createUser(createUserDto);
 
-    const result = await service.createUser(createUserDto);
-
-    expect(mockDb.select).toHaveBeenCalled();
-    expect(mockDb.from).toHaveBeenCalledWith(schema.users);
-    expect(mockDb.where).toHaveBeenCalledWith(
-      sql`${schema.users.email} = ${createUserDto.email}`,
-    );
-    expect(mockDb.insert).toHaveBeenCalledWith(schema.users);
-    expect(mockDb.values).toHaveBeenCalledWith({
-      email: createUserDto.email,
-      name: createUserDto.name,
-      password: expect.any(String) as string,
+      expect(mockDb.values).toHaveBeenCalledWith({
+        email: createUserDto.email,
+        name: createUserDto.name,
+        password: expect.any(String),
+      });
+      expect(result).toBeDefined();
+      expect(result.email).toBe(createUserDto.email);
+      expect(result.phone).toBeUndefined();
     });
-    expect(mockDb.returning).toHaveBeenCalledWith({
-      id: schema.users.id,
-      email: schema.users.email,
-      name: schema.users.name,
-      phone: schema.users.phone,
-      createdAt: schema.users.createdAt,
-      updatedAt: schema.users.updatedAt,
+
+    it('should throw an error if user already exists', async () => {
+      mockDb.where.mockReturnValue([{ email: 'tester@example.com' }]);
+
+      const createUserDto = {
+        email: 'tester@example.com',
+        password: 'securepassword',
+        name: 'Test User',
+        phone: '123-456-7890',
+      };
+
+      await expect(service.createUser(createUserDto)).rejects.toThrow(
+        'User already exists',
+      );
     });
-    expect(result).toBeDefined();
-    expect(result.email).toBe(createUserDto.email);
-    expect(result.phone).toBeUndefined();
-  });
-
-  it('should throw an error if user already exists', async () => {
-    mockDb.select = jest.fn().mockReturnThis();
-    mockDb.from = jest.fn().mockReturnThis();
-    mockDb.where = jest.fn().mockReturnValue([{ email: 'tester@example.com' }]);
-
-    const createUserDto = {
-      email: 'tester@example.com',
-      password: 'securepassword',
-      name: 'Test User',
-      phone: '123-456-7890',
-    };
-
-    await expect(service.createUser(createUserDto)).rejects.toThrow(
-      'User already exists',
-    );
   });
 });
