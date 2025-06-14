@@ -1,15 +1,18 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Logger,
+  Param,
   Post,
 } from '@nestjs/common';
 import { AddressesService } from './addresses.service';
 import { AddAddressDto } from './addresses';
 import { ResultStatus } from '../..//common/enum/result';
 import { HttpResponse } from '../../common/http-response';
+import { AddressResponse } from './addresses.interface';
 
 @Controller('addresses')
 export class AddressesController {
@@ -33,6 +36,19 @@ export class AddressesController {
       status: ResultStatus.SUCCESS,
       message: 'Address added successfully',
       data: await this.addressesService.addNewAddress(addressData),
+    };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get(':userId')
+  async getUserAddresses(
+    @Param('userId') userId: string,
+  ): Promise<HttpResponse<AddressResponse[]>> {
+    this.logger.log(`Incoming request to get addresses for user: ${userId}`);
+    return {
+      status: ResultStatus.SUCCESS,
+      message: 'Addresses retrieved successfully',
+      data: await this.addressesService.getUserAddresses(userId),
     };
   }
 }
