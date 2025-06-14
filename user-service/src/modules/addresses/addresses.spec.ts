@@ -51,5 +51,33 @@ describe('Addresses', () => {
       expect(dto.country).toBe('USA');
       expect(dto.isDefault).toBeUndefined();
     });
+
+    it('should convert data to object', () => {
+      const dto = new AddAddressDto({
+        userId: 'user123',
+        type: 'SHIPPING',
+        addressLine1: '123 Main St',
+        addressLine2: 'Apt 4B',
+        city: 'Springfield',
+        state: 'IL',
+        postalCode: '62701',
+        country: 'USA',
+        isDefault: true,
+      });
+
+      const obj = { ...dto };
+
+      expect(obj).toEqual({
+        userId: 'user123',
+        type: 'SHIPPING',
+        addressLine1: '123 Main St',
+        addressLine2: 'Apt 4B',
+        city: 'Springfield',
+        state: 'IL',
+        postalCode: '62701',
+        country: 'USA',
+        isDefault: true,
+      });
+    });
   });
 });
