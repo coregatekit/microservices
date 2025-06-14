@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AddressesService } from './addresses.service';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
 import { AddAddressDto } from './addresses';
+import * as schema from '../../db/drizzle/schema';
+import { sql } from 'drizzle-orm';
 
 const mockDb = {
   query: {
@@ -9,6 +11,9 @@ const mockDb = {
       findFirst: jest.fn(),
     },
   },
+  select: jest.fn(),
+  from: jest.fn(),
+  where: jest.fn(),
   insert: jest.fn(),
   values: jest.fn(),
   returning: jest.fn(),
@@ -121,6 +126,72 @@ describe('AddressesService', () => {
       await expect(service.addNewAddress(addressData)).rejects.toThrow(
         'Database error',
       );
+    });
+  });
+
+  describe('getUserAddresses', () => {
+    const userId = 'user123';
+    mockDb.select = jest.fn().mockReturnThis();
+    mockDb.from = jest.fn().mockReturnThis();
+    const mockAddress = {
+      id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
+      userId: 'user123',
+      type: 'SHIPPING',
+      addressLine1: '123 Main St',
+      addressLine2: 'Apt 4B',
+      city: 'Springfield',
+      state: 'IL',
+      postalCode: '62701',
+      country: 'USA',
+      isDefault: true,
+      createdAt: new Date('2025-06-12T00:00:00Z'),
+      updatedAt: new Date('2025-06-12T00:00:00Z'),
+    };
+
+    it('should return a list of addresses for a user', async () => {
+      mockDb.where = jest.fn().mockReturnValue([mockAddress]);
+
+      const result = await service.getUserAddresses(userId);
+
+      expect(result).toBeDefined();
+      expect(result).toEqual([mockAddress]);
+      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockDb.from).toHaveBeenCalledWith(schema.addresses);
+      expect(mockDb.where).toHaveBeenCalledWith(
+        sql`${schema.addresses.userId} = ${userId}`,
+      );
+    });
+
+    it('should throw an error if no addresses found for user', async () => {
+      mockDb.where = jest.fn().mockReturnValue([]);
+
+      await expect(service.getUserAddresses(userId)).rejects.toThrow(
+        `No addresses found for user ID: ${userId}`,
+      );
+    });
+
+    it('should return partial addresses if some fields are missing', async () => {
+      const partialAddress = {
+        id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
+        userId: 'user123',
+        type: 'SHIPPING',
+        addressLine1: '123 Main St',
+        city: 'Springfield',
+        state: 'IL',
+        postalCode: '62701',
+        country: 'USA',
+        isDefault: true,
+        createdAt: new Date('2025-06-12T00:00:00Z'),
+        updatedAt: new Date('2025-06-12T00:00:00Z'),
+      };
+
+      mockDb.where = jest.fn().mockReturnValue([partialAddress]);
+
+      const result = await service.getUserAddresses(userId);
+
+      expect(result).toBeDefined();
+      expect(result).toEqual([partialAddress]);
+      expect(result[0].addressLine2).toBeUndefined();
     });
   });
 });

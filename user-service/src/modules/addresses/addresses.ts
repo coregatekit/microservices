@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
+import { AddressDB, AddressResponse } from './addresses.interface';
 
 export class AddAddressDto {
   @ApiProperty()
@@ -39,4 +40,21 @@ export class AddAddressDto {
   constructor(partial: Partial<AddAddressDto>) {
     Object.assign(this, partial);
   }
+}
+
+export function transformAddressResponse(address: AddressDB): AddressResponse {
+  return {
+    id: address.id,
+    userId: address.userId,
+    type: address.type,
+    addressLine1: address.addressLine1,
+    addressLine2: address.addressLine2 || undefined,
+    city: address.city,
+    state: address.state,
+    postalCode: address.postalCode,
+    country: address.country,
+    isDefault: address.isDefault,
+    createdAt: new Date(address.createdAt),
+    updatedAt: new Date(address.updatedAt),
+  };
 }

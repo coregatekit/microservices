@@ -3,12 +3,14 @@ import {
   Inject,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
 import * as schema from '../../db/drizzle/schema';
-import { AddAddressDto } from './addresses';
-import { AddAddressResponse } from './addresses.interface';
+import { AddAddressDto, transformAddressResponse } from './addresses';
+import { AddAddressResponse, AddressResponse } from './addresses.interface';
+import { sql } from 'drizzle-orm';
 
 @Injectable()
 export class AddressesService {
@@ -68,5 +70,21 @@ export class AddressesService {
       `Address added successfully for user ID: ${userId}, address ID: ${result[0].id}`,
     );
     return { id: result[0].id };
+  }
+
+  async getUserAddresses(userId: string): Promise<AddressResponse[]> {
+    this.logger.log(`Fetching addresses for user ID: ${userId}`);
+    const addresses = await this.db
+      .select()
+      .from(schema.addresses)
+      .where(sql`${schema.addresses.userId} = ${userId}`);
+
+    if (addresses.length === 0) {
+      this.logger.warn(`No addresses found for user ID: ${userId}`);
+      throw new NotFoundException(`No addresses found for user ID: ${userId}`);
+    }
+
+    this.logger.log('Transforming address responses');
+    return addresses.map((address) => transformAddressResponse(address));
   }
 }
