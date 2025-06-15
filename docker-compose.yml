@@ -11,3 +11,41 @@ services:
       - "5432:5432"
     volumes:
       - ./db_data:/var/lib/postgresql/data
+  
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: my_auth_service
+    environment:
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8080
+      KEYCLOAK_ADMIN: tonystark
+      KEYCLOAK_ADMIN_PASSWORD: supernova123123
+      KC_DB: "postgres"
+      KC_DB_URL: "jdbc:postgresql://keycloakdb:5432/keycloak"
+      KC_DB_USERNAME: "keycloak"
+      KC_DB_PASSWORD: "hXhyqInnoXr64cXP"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloakdb
+    networks:
+      - keycloak_network
+    command: start-dev
+  
+  keycloakdb:
+    image: postgres:17
+    container_name: keycloak_db
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: hXhyqInnoXr64cXP
+      POSTGRES_DB: keycloak
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./keycloak_db_data:/var/lib/postgresql/data
+    networks:
+      - keycloak_network
+
+networks:
+  keycloak_network:
