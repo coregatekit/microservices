@@ -4,6 +4,7 @@ import { DrizzleAsyncProvider } from '../../db/db.provider';
 import { AddAddressDto } from './addresses';
 import * as schema from '../../db/drizzle/schema';
 import { sql } from 'drizzle-orm';
+import { AddressType } from './addresses.enum';
 
 describe('AddressesService', () => {
   let service: AddressesService;
@@ -20,6 +21,8 @@ describe('AddressesService', () => {
     insert: jest.fn().mockReturnThis(),
     values: jest.fn().mockReturnThis(),
     returning: jest.fn(),
+    update: jest.fn(),
+    set: jest.fn(),
   };
 
   const testAddress: AddAddressDto = {
@@ -270,6 +273,58 @@ describe('AddressesService', () => {
       // Act & Assert
       await expect(service.getUserDefaultAddress(userId)).rejects.toThrow(
         `No default address found for user ID: ${userId}`,
+      );
+    });
+  });
+
+  describe('changeUserDefaultAddress', () => {
+    const userId = 'user123';
+    const addressId = 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3';
+
+    beforeEach(() => {
+      // Reset mocks for each test
+      mockDb.select.mockClear();
+      mockDb.from.mockClear();
+      mockDb.where.mockReset();
+      mockDb.limit.mockReset();
+      mockDb.update.mockClear();
+      mockDb.set.mockClear();
+    });
+
+    it('should change the default address for a user', async () => {
+      mockDb.select.mockReturnThis();
+      mockDb.from.mockReturnThis();
+      mockDb.where.mockReturnThis();
+      mockDb.limit.mockReturnValue([mockAddress]);
+      mockDb.update.mockReturnThis();
+      mockDb.set.mockReturnThis();
+      mockDb.returning = jest.fn().mockResolvedValue([{ id: addressId }]);
+
+      const result = await service.changeUserDefaultAddress(
+        userId,
+        addressId,
+        AddressType.SHIPPING,
+      );
+
+      expect(result).toEqual({
+        id: addressId,
+      });
+    });
+
+    it('should throw an error if address not found for user', async () => {
+      // Arrange
+      mockDb.where.mockReturnThis();
+      mockDb.limit.mockReturnValue([]);
+
+      // Act & Assert
+      await expect(
+        service.changeUserDefaultAddress(
+          userId,
+          addressId,
+          AddressType.SHIPPING,
+        ),
+      ).rejects.toThrow(
+        `Address with ID: ${addressId} not found for user ID: ${userId}`,
       );
     });
   });

@@ -11,6 +11,7 @@ import * as schema from '../../db/drizzle/schema';
 import { AddAddressDto, transformAddressResponse } from './addresses';
 import { AddAddressResponse, AddressResponse } from './addresses.interface';
 import { sql } from 'drizzle-orm';
+import { AddressType } from './addresses.enum';
 
 @Injectable()
 export class AddressesService {
@@ -134,5 +135,67 @@ export class AddressesService {
 
     this.logger.log('Transforming address response');
     return transformAddressResponse(address[0]);
+  }
+
+  async changeUserDefaultAddress(
+    userId: string,
+    addressId: string,
+    type: AddressType,
+  ): Promise<{ id: string }> {
+    this.logger.log(
+      `Changing default address for user ID: ${userId}, address ID: ${addressId}, type: ${type}`,
+    );
+
+    this.logger.log(
+      `Finding address with ID: ${addressId} for user ID: ${userId}`,
+    );
+    const address = await this.db
+      .select()
+      .from(schema.addresses)
+      .where(
+        sql`${schema.addresses.id} = ${addressId} AND ${schema.addresses.userId} = ${userId}  AND ${schema.addresses.type} = ${type}`,
+      )
+      .limit(1);
+
+    if (address.length === 0) {
+      this.logger.warn(
+        `Address with ID: ${addressId} not found for user ID: ${userId}`,
+      );
+      throw new NotFoundException(
+        `Address with ID: ${addressId} not found for user ID: ${userId}`,
+      );
+    }
+
+    // Set deafult to false for all addresses with input type of the user
+    this.logger.log(
+      `Setting all addresses of type ${type} to not default for user ID: ${userId}`,
+    );
+    await this.db
+      .update(schema.addresses)
+      .set({
+        isDefault: false,
+      })
+      .where(
+        sql`${schema.addresses.userId} = ${userId} AND ${schema.addresses.type} = ${type}`,
+      );
+
+    // Set the selected address to default
+    this.logger.log(
+      `Setting address ID: ${addressId} as default for user ID: ${userId}`,
+    );
+    const updatedAddressId = await this.db
+      .update(schema.addresses)
+      .set({ isDefault: true })
+      .where(
+        sql`${schema.addresses.id} = ${addressId} AND ${schema.addresses.userId} = ${userId}`,
+      )
+      .returning({
+        id: schema.addresses.id,
+      });
+
+    this.logger.log(
+      `Default address changed successfully for user ID: ${userId}, address ID: ${addressId}`,
+    );
+    return { id: updatedAddressId[0].id };
   }
 }
