@@ -8,10 +8,12 @@ import { AddressesModule } from './modules/addresses/addresses.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     UsersModule,
     HealthModule,
     DbModule,
-    ConfigModule.forRoot(),
     AuthModule,
     AddressesModule,
   ],
