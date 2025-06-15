@@ -88,6 +88,26 @@ export class AddressesService {
     return addresses.map((address) => transformAddressResponse(address));
   }
 
+  async getUserDefaultAddress(userId: string): Promise<AddressResponse[]> {
+    this.logger.log(`Fetching default address for user ID: ${userId}`);
+    const addresses = await this.db
+      .select()
+      .from(schema.addresses)
+      .where(
+        sql`${schema.addresses.userId} = ${userId} AND ${schema.addresses.isDefault} = true`,
+      );
+
+    if (addresses.length === 0) {
+      this.logger.warn(`No default address found for user ID: ${userId}`);
+      throw new NotFoundException(
+        `No default address found for user ID: ${userId}`,
+      );
+    }
+
+    this.logger.log('Transforming default address response');
+    return addresses.map((address) => transformAddressResponse(address));
+  }
+
   async getAddressById(
     addressId: string,
     userId: string,

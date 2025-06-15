@@ -33,10 +33,27 @@ describe('AddressesService', () => {
     country: 'USA',
     isDefault: true,
   };
+  const testBillingAddress: AddAddressDto = {
+    userId: 'user123',
+    type: 'BILLING',
+    addressLine1: '123 Main St',
+    addressLine2: 'Apt 4B',
+    city: 'Springfield',
+    state: 'IL',
+    postalCode: '62701',
+    country: 'USA',
+    isDefault: true,
+  };
 
   const mockAddress = {
     id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
     ...testAddress,
+    createdAt: new Date('2025-06-12T00:00:00Z'),
+    updatedAt: new Date('2025-06-12T00:00:00Z'),
+  };
+  const mockBillingAddress = {
+    id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE4',
+    ...testBillingAddress,
     createdAt: new Date('2025-06-12T00:00:00Z'),
     updatedAt: new Date('2025-06-12T00:00:00Z'),
   };
@@ -225,6 +242,35 @@ describe('AddressesService', () => {
       // Assert
       expect(result.addressLine2).toBeUndefined();
       expect(result).toEqual(partialAddress);
+    });
+  });
+
+  describe('getUserDefaultAddress', () => {
+    const userId = 'user123';
+
+    it('should return default addresses for a user', async () => {
+      // Arrange
+      mockDb.select.mockReturnThis();
+      mockDb.from.mockReturnThis();
+      mockDb.where.mockReturnValue([mockAddress, mockBillingAddress]);
+
+      // Act
+      const result = await service.getUserDefaultAddress(userId);
+
+      // Assert
+      expect(result).toEqual([mockAddress, mockBillingAddress]);
+    });
+
+    it('should throw an error if no default addresses found for user', async () => {
+      // Arrange
+      mockDb.select.mockReturnThis();
+      mockDb.from.mockReturnThis();
+      mockDb.where.mockReturnValue([]);
+
+      // Act & Assert
+      await expect(service.getUserDefaultAddress(userId)).rejects.toThrow(
+        `No default address found for user ID: ${userId}`,
+      );
     });
   });
 });
