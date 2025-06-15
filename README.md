@@ -68,6 +68,10 @@ Order Shipped → User Service (send notification)
 - Redis for caching
 - Message broker (RabbitMQ/Kafka)
 
+#### Authorization & Authentication
+
+- Keycloak
+
 #### Infrastructure:
 
 - Kubernetes for orchestration
