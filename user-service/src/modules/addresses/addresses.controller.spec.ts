@@ -11,6 +11,7 @@ describe('AddressesController', () => {
     getUserAddresses: jest.fn(),
     getAddressById: jest.fn(),
     getUserDefaultAddress: jest.fn(),
+    updateAddress: jest.fn(),
     changeUserDefaultAddress: jest.fn(),
   };
 
@@ -177,6 +178,59 @@ describe('AddressesController', () => {
         status: 'success',
         message: 'Default address retrieved successfully',
         data: mockDefaultAddress,
+      });
+    });
+  });
+
+  describe('updateAddress', () => {
+    const userId = 'user123';
+    const addressId = 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3';
+    const updateData = {
+      type: AddressType.SHIPPING,
+      addressLine1: '456 Elm St',
+      addressLine2: 'Apt 5C',
+      city: 'Springfield',
+      state: 'IL',
+      postalCode: '62702',
+      country: 'USA',
+    };
+
+    it('should call AddressesService.updateAddress with correct userId, addressId, and updateData', async () => {
+      const mockResponse = { id: addressId };
+      mockAddressesService.updateAddress = jest
+        .fn()
+        .mockResolvedValue(mockResponse);
+
+      const result = await controller.updateAddress(
+        userId,
+        addressId,
+        updateData,
+      );
+
+      expect(mockAddressesService.updateAddress).toHaveBeenCalledWith(
+        userId,
+        addressId,
+        updateData,
+      );
+      expect(result).toEqual({
+        status: 'success',
+        message: 'Address updated successfully',
+        data: mockResponse,
+      });
+    });
+
+    it('should return error if updateData is invalid', async () => {
+      const invalidUpdateData = {};
+
+      const result = await controller.updateAddress(
+        userId,
+        addressId,
+        invalidUpdateData,
+      );
+
+      expect(result).toEqual({
+        status: 'error',
+        message: 'Invalid request body',
       });
     });
   });

@@ -82,18 +82,31 @@ export class AddressesController {
     };
   }
 
-  @HttpCode(HttpStatus.NOT_IMPLEMENTED)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('user/:userId/:addressId/update')
   async updateAddress(
     @Param('userId') userId: string,
     @Param('addressId') addressId: string,
+    @Body() body: UpdateAddressDto,
   ): Promise<HttpResponse<{ id: string }>> {
     this.logger.log(
       `Incoming request to update address for user: ${userId}, addressId: ${addressId}`,
     );
+
+    if (!body || !body.type) {
+      this.logger.error(
+        `Invalid request body for updating address: ${JSON.stringify(body)}`,
+      );
+      return {
+        status: ResultStatus.ERROR,
+        message: 'Invalid request body',
+      };
+    }
+
     return {
-      status: ResultStatus.ERROR,
-      message: 'The functionality is not implemented yet',
+      status: ResultStatus.SUCCESS,
+      message: 'Address updated successfully',
+      data: await this.addressesService.updateAddress(userId, addressId, body),
     };
   }
 
