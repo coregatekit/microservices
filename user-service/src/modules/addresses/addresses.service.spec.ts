@@ -13,6 +13,9 @@ describe('AddressesService', () => {
       users: {
         findFirst: jest.fn(),
       },
+      addresses: {
+        findFirst: jest.fn(),
+      },
     },
     select: jest.fn().mockReturnThis(),
     from: jest.fn().mockReturnThis(),
@@ -277,6 +280,60 @@ describe('AddressesService', () => {
     });
   });
 
+  describe('updateAddress', () => {
+    const userId = 'user123';
+    const addressId = 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3';
+    const updateData = {
+      type: AddressType.SHIPPING,
+      addressLine1: '456 Elm St',
+      addressLine2: 'Suite 5A',
+      city: 'Springfield',
+      state: 'IL',
+      postalCode: '62702',
+      country: 'USA',
+    };
+
+    beforeEach(() => {
+      // Reset mocks for each test
+      mockDb.select.mockClear();
+      mockDb.from.mockClear();
+      mockDb.where.mockReset();
+      mockDb.update.mockClear();
+      mockDb.set.mockClear();
+    });
+
+    it('should update an address successfully', async () => {
+      // Arrange
+      mockDb.query.addresses.findFirst.mockResolvedValue(mockAddress);
+      mockDb.update.mockReturnThis();
+      mockDb.set.mockReturnThis();
+      mockDb.where.mockReturnThis();
+      mockDb.returning = jest.fn().mockResolvedValue([{ id: addressId }]);
+
+      // Act
+      const result = await service.updateAddress(userId, addressId, updateData);
+
+      // Assert
+      expect(result).toEqual({ id: addressId });
+      expect(mockDb.query.addresses.findFirst).toHaveBeenCalledWith({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        where: expect.anything(),
+      });
+    });
+
+    it('should throw an error if address not found for user', async () => {
+      // Arrange
+      mockDb.query.addresses.findFirst.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        service.updateAddress(userId, addressId, updateData),
+      ).rejects.toThrow(
+        `Address with ID: ${addressId} not found for user ID: ${userId}`,
+      );
+    });
+  });
+
   describe('changeUserDefaultAddress', () => {
     const userId = 'user123';
     const addressId = 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3';
@@ -292,6 +349,7 @@ describe('AddressesService', () => {
     });
 
     it('should change the default address for a user', async () => {
+      // Arrange
       mockDb.select.mockReturnThis();
       mockDb.from.mockReturnThis();
       mockDb.where.mockReturnThis();
@@ -300,12 +358,14 @@ describe('AddressesService', () => {
       mockDb.set.mockReturnThis();
       mockDb.returning = jest.fn().mockResolvedValue([{ id: addressId }]);
 
+      // Act
       const result = await service.changeUserDefaultAddress(
         userId,
         addressId,
         AddressType.SHIPPING,
       );
 
+      // Assert
       expect(result).toEqual({
         id: addressId,
       });

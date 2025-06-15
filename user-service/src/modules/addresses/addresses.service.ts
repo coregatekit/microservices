@@ -137,6 +137,52 @@ export class AddressesService {
     return transformAddressResponse(address[0]);
   }
 
+  async updateAddress(
+    userId: string,
+    addressId: string,
+    updateData: Partial<AddAddressDto>,
+  ): Promise<{ id: string }> {
+    this.logger.log(
+      `Updating address with ID: ${addressId} for user ID: ${userId}`,
+    );
+
+    this.logger.log(
+      `Finding address with ID: ${addressId} for user ID: ${userId}`,
+    );
+    const address = await this.db.query.addresses.findFirst({
+      where: (addresses, { eq }) =>
+        eq(addresses.id, addressId) && eq(addresses.userId, userId),
+    });
+
+    if (!address) {
+      this.logger.warn(
+        `Address with ID: ${addressId} not found for user ID: ${userId}`,
+      );
+      throw new NotFoundException(
+        `Address with ID: ${addressId} not found for user ID: ${userId}`,
+      );
+    }
+
+    this.logger.log(
+      `Updating address with ID: ${addressId} for user ID: ${userId}`,
+    );
+    const updatedAddress = await this.db
+      .update(schema.addresses)
+      .set({
+        ...updateData,
+        userId: userId, // Ensure userId is set
+        type: updateData.type || address.type, // Preserve type if not provided
+      })
+      .where(
+        sql`${schema.addresses.id} = ${addressId} AND ${schema.addresses.userId} = ${userId}`,
+      )
+      .returning({
+        id: schema.addresses.id,
+      });
+
+    return { id: updatedAddress[0].id };
+  }
+
   async changeUserDefaultAddress(
     userId: string,
     addressId: string,
