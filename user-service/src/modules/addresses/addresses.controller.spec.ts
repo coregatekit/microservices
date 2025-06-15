@@ -9,6 +9,7 @@ describe('AddressesController', () => {
     addNewAddress: jest.fn(),
     getUserAddresses: jest.fn(),
     getAddressById: jest.fn(),
+    getUserDefaultAddress: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -126,6 +127,54 @@ describe('AddressesController', () => {
         status: 'success',
         message: 'Address retrieved successfully',
         data: mockAddressDetail,
+      });
+    });
+  });
+
+  describe('getUserDefaultAddress', () => {
+    const userId = 'user123';
+
+    it('should call AddressesService.getUserDefaultAddress with correct userId', async () => {
+      const mockDefaultAddress = [
+        {
+          id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
+          userId: 'user123',
+          type: 'SHIPPING',
+          addressLine1: '123 Main St',
+          addressLine2: 'Apt 4B',
+          city: 'Springfield',
+          state: 'IL',
+          postalCode: '62701',
+          country: 'USA',
+          isDefault: true,
+        },
+        {
+          id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE4',
+          userId: 'user123',
+          type: 'BILLING',
+          addressLine1: '123 Main St',
+          addressLine2: 'Apt 4B',
+          city: 'Springfield',
+          state: 'IL',
+          postalCode: '62701',
+          country: 'USA',
+          isDefault: true,
+        },
+      ];
+
+      mockAddressesService.getUserDefaultAddress.mockResolvedValue(
+        mockDefaultAddress,
+      );
+
+      const result = await controller.getUserDefaultAddress(userId);
+
+      expect(mockAddressesService.getUserDefaultAddress).toHaveBeenCalledWith(
+        userId,
+      );
+      expect(result).toEqual({
+        status: 'success',
+        message: 'Default address retrieved successfully',
+        data: mockDefaultAddress,
       });
     });
   });

@@ -67,15 +67,18 @@ export class AddressesController {
     };
   }
 
-  @HttpCode(HttpStatus.NOT_IMPLEMENTED)
+  @HttpCode(HttpStatus.OK)
   @Get('user/:userId/default')
-  async getDefaultAddress(
+  async getUserDefaultAddress(
     @Param('userId') userId: string,
-  ): Promise<HttpResponse<AddressResponse>> {
-    this.logger.log(`Incoming request to get default address for user: ${userId}`);
+  ): Promise<HttpResponse<AddressResponse[]>> {
+    this.logger.log(
+      `Incoming request to get default address for user: ${userId}`,
+    );
     return {
-      status: ResultStatus.ERROR,
-      message: 'The functionality is not implemented yet',
+      status: ResultStatus.SUCCESS,
+      message: 'Default address retrieved successfully',
+      data: await this.addressesService.getUserDefaultAddress(userId),
     };
   }
 
