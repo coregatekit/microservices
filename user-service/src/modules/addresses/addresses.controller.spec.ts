@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AddressesController } from './addresses.controller';
 import { AddressesService } from './addresses.service';
+import { AddressType } from './addresses.enum';
 
 describe('AddressesController', () => {
   let controller: AddressesController;
@@ -10,6 +11,7 @@ describe('AddressesController', () => {
     getUserAddresses: jest.fn(),
     getAddressById: jest.fn(),
     getUserDefaultAddress: jest.fn(),
+    changeUserDefaultAddress: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -175,6 +177,49 @@ describe('AddressesController', () => {
         status: 'success',
         message: 'Default address retrieved successfully',
         data: mockDefaultAddress,
+      });
+    });
+  });
+
+  describe('setDefaultAddress', () => {
+    const userId = 'user123';
+    const addressId = 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3';
+    const updateData = { type: AddressType.SHIPPING };
+
+    it('should call AddressesService.setDefaultAddress with correct userId, addressId, and updateData', async () => {
+      const mockResponse = { id: addressId };
+      mockAddressesService.changeUserDefaultAddress = jest
+        .fn()
+        .mockResolvedValue(mockResponse);
+
+      const result = await controller.setDefaultAddress(
+        userId,
+        addressId,
+        updateData,
+      );
+
+      expect(
+        mockAddressesService.changeUserDefaultAddress,
+      ).toHaveBeenCalledWith(userId, addressId, updateData.type);
+      expect(result).toEqual({
+        status: 'success',
+        message: 'Default address updated successfully',
+        data: mockResponse,
+      });
+    });
+
+    it('should return error if updateData is invalid', async () => {
+      const invalidUpdateData = {};
+
+      const result = await controller.setDefaultAddress(
+        userId,
+        addressId,
+        invalidUpdateData,
+      );
+
+      expect(result).toEqual({
+        status: 'error',
+        message: 'Invalid request body',
       });
     });
   });
