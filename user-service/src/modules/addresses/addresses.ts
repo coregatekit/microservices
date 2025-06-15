@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 import { AddressDB, AddressResponse } from './addresses.interface';
+import { AddressType } from './addresses.enum';
 
 export class AddAddressDto {
   @ApiProperty()
@@ -38,6 +39,44 @@ export class AddAddressDto {
   isDefault?: boolean;
 
   constructor(partial: Partial<AddAddressDto>) {
+    Object.assign(this, partial);
+  }
+}
+
+export class UpdateAddressDto {
+  @ApiProperty()
+  @IsOptional()
+  userId?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  type?: AddressType;
+
+  @ApiProperty()
+  @IsOptional()
+  addressLine1?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  addressLine2?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  city?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  state?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  postalCode?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  country?: string;
+
+  constructor(partial: Partial<UpdateAddressDto>) {
     Object.assign(this, partial);
   }
 }
