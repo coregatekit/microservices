@@ -5,6 +5,7 @@ import { DbModule } from './db/db.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
+import { KeycloakModule } from './modules/keycloak/keycloak.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AddressesModule } from './modules/addresses/addresses.module';
     DbModule,
     AuthModule,
     AddressesModule,
+    KeycloakModule,
   ],
   controllers: [],
   providers: [],
