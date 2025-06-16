@@ -2,7 +2,10 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
-import { AccessTokenResponse } from './keycloak.type';
+import {
+  AccessTokenResponse,
+  CreateKeycloakUserRequest,
+} from './keycloak.type';
 import { CreateKeycloakUser } from './keycloak';
 
 @Injectable()
@@ -47,7 +50,7 @@ export class KeycloakService {
     const accessToken = await this.getAccessToken();
     const url = `${this.configService.get<string>('KEYCLOAK_BASE_URL')}/admin/realms/${this.configService.get<string>('KEYCLOAK_REALM')}/users`;
 
-    const userPayload = {
+    const userPayload: CreateKeycloakUserRequest = {
       enabled: true,
       email: userData.email,
       firstName: userData.firstName,
@@ -59,6 +62,9 @@ export class KeycloakService {
           temporary: false,
         },
       ],
+      attributes: {
+        uid: userData.uid,
+      },
     };
 
     this.logger.log('Sending request to create user in Keycloak');

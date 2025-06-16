@@ -94,6 +94,7 @@ describe('KeycloakService', () => {
   describe('createUser', () => {
     it('should create a user in Keycloak', async () => {
       const data = new CreateKeycloakUser({
+        uid: '12345',
         email: '',
         firstName: 'John',
         lastName: 'Doe',
@@ -127,6 +128,9 @@ describe('KeycloakService', () => {
               temporary: false,
             },
           ],
+          attributes: {
+            uid: data.uid,
+          },
         },
         {
           headers: {
