@@ -1,9 +1,9 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { catchError, firstValueFrom } from 'rxjs';
-import { AxiosError } from 'axios';
+import { firstValueFrom } from 'rxjs';
 import { AccessTokenResponse } from './keycloak.type';
+import { CreateKeycloakUser } from './keycloak';
 
 @Injectable()
 export class KeycloakService {
@@ -29,14 +29,55 @@ export class KeycloakService {
     );
     params.append('grant_type', 'client_credentials');
 
+    this.logger.log('Fetching access token from Keycloak');
     const { data } = await firstValueFrom(
-      this.httpService.post<AccessTokenResponse>(url, params).pipe(
-        catchError((error: AxiosError) => {
-          this.logger.error('Error fetching access token', error);
-          throw new Error('Failed to fetch access token from Keycloak');
-        }),
-      ),
+      this.httpService.post<AccessTokenResponse>(url, params),
     );
+
+    if (!data || !data.access_token) {
+      this.logger.error('Failed to retrieve access token from Keycloak');
+      throw new Error('Failed to retrieve access token from Keycloak');
+    }
+
     return data.access_token;
+  }
+
+  async createUser(userData: CreateKeycloakUser): Promise<void> {
+    this.logger.log('Creating user in Keycloak');
+    const accessToken = await this.getAccessToken();
+    const url = `${this.configService.get<string>('KEYCLOAK_BASE_URL')}/admin/realms/${this.configService.get<string>('KEYCLOAK_REALM')}/users`;
+
+    const userPayload = {
+      enabled: true,
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      credentials: [
+        {
+          type: 'password',
+          value: userData.password,
+          temporary: false,
+        },
+      ],
+    };
+
+    this.logger.log('Sending request to create user in Keycloak');
+    const response = await firstValueFrom(
+      this.httpService.post(url, userPayload, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }),
+    );
+
+    if (response.status !== 201) {
+      this.logger.error(
+        `Failed to create user in Keycloak: ${response.statusText}`,
+      );
+      throw new Error('Failed to create user in Keycloak');
+    }
+
+    this.logger.log('User created successfully in Keycloak');
   }
 }

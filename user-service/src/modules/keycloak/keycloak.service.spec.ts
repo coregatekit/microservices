@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
 import { of } from 'rxjs';
+import { CreateKeycloakUser } from './keycloak';
 
 describe('KeycloakService', () => {
   let service: KeycloakService;
@@ -70,6 +71,94 @@ describe('KeycloakService', () => {
         expect.any(URLSearchParams),
       );
       expect(result).toEqual('mock_access_token');
+    });
+
+    it('should throw an error if access token retrieval fails', async () => {
+      mockHttpService.post.mockImplementation(() => {
+        const mockResponse: AxiosResponse = {
+          data: {},
+          status: 400,
+          statusText: 'Bad Request',
+          headers: {},
+          config: { headers: {} as any },
+        };
+        return of(mockResponse);
+      });
+
+      await expect(service.getAccessToken()).rejects.toThrow(
+        'Failed to retrieve access token from Keycloak',
+      );
+    });
+  });
+
+  describe('createUser', () => {
+    it('should create a user in Keycloak', async () => {
+      const data = new CreateKeycloakUser({
+        email: '',
+        firstName: 'John',
+        lastName: 'Doe',
+        password: 'secureP@ssw0rd',
+      });
+      service.getAccessToken = jest.fn().mockResolvedValue('mock_access_token');
+      mockHttpService.post.mockImplementation(() => {
+        const mockResponse: AxiosResponse = {
+          data: {},
+          status: 201,
+          statusText: 'Created',
+          headers: {},
+          config: { headers: {} as any },
+        };
+        return of(mockResponse);
+      });
+
+      await service.createUser(data);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        'http://mock-keycloak-url/admin/realms/mock-realm/users',
+        {
+          enabled: true,
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          credentials: [
+            {
+              type: 'password',
+              value: data.password,
+              temporary: false,
+            },
+          ],
+        },
+        {
+          headers: {
+            Authorization: `Bearer mock_access_token`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    });
+
+    it('should throw an error if user creation fails', async () => {
+      const data = new CreateKeycloakUser({
+        email: '',
+        firstName: 'John',
+        lastName: 'Doe',
+        password: 'secureP@ssw0rd',
+      });
+
+      service.getAccessToken = jest.fn().mockResolvedValue('mock_access_token');
+      mockHttpService.post.mockImplementation(() => {
+        const mockResponse: AxiosResponse = {
+          data: {},
+          status: 400,
+          statusText: 'Bad Request',
+          headers: {},
+          config: { headers: {} as any },
+        };
+        return of(mockResponse);
+      });
+      await expect(service.createUser(data)).rejects.toThrow(
+        'Failed to create user in Keycloak',
+      );
     });
   });
 });
