@@ -8,7 +8,6 @@ describe('Keycloak', () => {
         firstName: 'John',
         lastName: 'Doe',
         password: 'secureP@ssw0rd',
-        phone: '123-456-7890',
       });
 
       expect(dto).toBeDefined();
