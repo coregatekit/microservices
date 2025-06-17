@@ -6,14 +6,16 @@ describe('Users', () => {
       const dto = new CreateUserDto({
         email: 'john@example.com',
         password: 'password123',
-        name: 'John Doe',
+        firstName: 'John',
+        lastName: 'Doe',
         phone: '123-456-7890',
       });
 
       expect(dto).toBeDefined();
       expect(dto.email).toBe('john@example.com');
       expect(dto.password).toBe('password123');
-      expect(dto.name).toBe('John Doe');
+      expect(dto.firstName).toBe('John');
+      expect(dto.lastName).toBe('Doe');
       expect(dto.phone).toBe('123-456-7890');
     });
 
@@ -21,7 +23,8 @@ describe('Users', () => {
       const dto = new CreateUserDto({
         email: 'john@example.com',
         password: 'password123',
-        name: 'John Doe',
+        firstName: 'John',
+        lastName: 'Doe',
       });
 
       expect(dto).toBeDefined();

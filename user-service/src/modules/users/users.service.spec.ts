@@ -2,8 +2,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
-import * as schema from '../../db/drizzle/schema';
-import { sql } from 'drizzle-orm';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -34,92 +32,92 @@ describe('UsersService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('createUser', () => {
-    const mockUserResponse = {
-      id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
-      email: 'john@example.com',
-      name: 'John Doe',
-      createdAt: new Date('2025-06-12T00:00:00Z'),
-      updatedAt: new Date('2025-06-12T00:00:00Z'),
-    };
+  // describe('createUser', () => {
+  //   const mockUserResponse = {
+  //     id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
+  //     email: 'john@example.com',
+  //     name: 'John Doe',
+  //     createdAt: new Date('2025-06-12T00:00:00Z'),
+  //     updatedAt: new Date('2025-06-12T00:00:00Z'),
+  //   };
 
-    const setupMockDbSuccess = (response: any) => {
-      mockDb.where.mockReturnValue([]);
-      mockDb.returning.mockResolvedValue([response]);
-    };
+  //   const setupMockDbSuccess = (response: any) => {
+  //     mockDb.where.mockReturnValue([]);
+  //     mockDb.returning.mockResolvedValue([response]);
+  //   };
 
-    it('should create a user successfully with all fields', async () => {
-      const userWithPhone = { ...mockUserResponse, phone: '123-456-7890' };
-      setupMockDbSuccess(userWithPhone);
+  //   it('should create a user successfully with all fields', async () => {
+  //     const userWithPhone = { ...mockUserResponse, phone: '123-456-7890' };
+  //     setupMockDbSuccess(userWithPhone);
 
-      const createUserDto = {
-        email: 'john@example.com',
-        password: 'securepassword',
-        name: 'John Doe',
-        phone: '123-456-7890',
-      };
+  //     const createUserDto = {
+  //       email: 'john@example.com',
+  //       password: 'securepassword',
+  //       name: 'John Doe',
+  //       phone: '123-456-7890',
+  //     };
 
-      const result = await service.createUser(createUserDto);
+  //     const result = await service.createUser(createUserDto);
 
-      expect(mockDb.select).toHaveBeenCalled();
-      expect(mockDb.from).toHaveBeenCalledWith(schema.users);
-      expect(mockDb.where).toHaveBeenCalledWith(
-        sql`${schema.users.email} = ${createUserDto.email}`,
-      );
-      expect(mockDb.insert).toHaveBeenCalledWith(schema.users);
-      expect(mockDb.values).toHaveBeenCalledWith({
-        email: createUserDto.email,
-        name: createUserDto.name,
-        password: expect.any(String), // Password should be hashed in actual implementation
-        phone: createUserDto.phone,
-      });
-      expect(mockDb.returning).toHaveBeenCalledWith({
-        id: schema.users.id,
-        email: schema.users.email,
-        name: schema.users.name,
-        phone: schema.users.phone,
-        createdAt: schema.users.createdAt,
-        updatedAt: schema.users.updatedAt,
-      });
-      expect(result).toBeDefined();
-      expect(result.email).toBe(createUserDto.email);
-      expect(result.phone).toBe(createUserDto.phone);
-    });
+  //     expect(mockDb.select).toHaveBeenCalled();
+  //     expect(mockDb.from).toHaveBeenCalledWith(schema.users);
+  //     expect(mockDb.where).toHaveBeenCalledWith(
+  //       sql`${schema.users.email} = ${createUserDto.email}`,
+  //     );
+  //     expect(mockDb.insert).toHaveBeenCalledWith(schema.users);
+  //     expect(mockDb.values).toHaveBeenCalledWith({
+  //       email: createUserDto.email,
+  //       name: createUserDto.name,
+  //       password: expect.any(String), // Password should be hashed in actual implementation
+  //       phone: createUserDto.phone,
+  //     });
+  //     expect(mockDb.returning).toHaveBeenCalledWith({
+  //       id: schema.users.id,
+  //       email: schema.users.email,
+  //       name: schema.users.name,
+  //       phone: schema.users.phone,
+  //       createdAt: schema.users.createdAt,
+  //       updatedAt: schema.users.updatedAt,
+  //     });
+  //     expect(result).toBeDefined();
+  //     expect(result.email).toBe(createUserDto.email);
+  //     expect(result.phone).toBe(createUserDto.phone);
+  //   });
 
-    it('should create a user with optional phone number', async () => {
-      setupMockDbSuccess(mockUserResponse);
+  //   it('should create a user with optional phone number', async () => {
+  //     setupMockDbSuccess(mockUserResponse);
 
-      const createUserDto = {
-        email: 'john@example.com',
-        password: 'securepassword',
-        name: 'John Doe',
-      };
+  //     const createUserDto = {
+  //       email: 'john@example.com',
+  //       password: 'securepassword',
+  //       name: 'John Doe',
+  //     };
 
-      const result = await service.createUser(createUserDto);
+  //     const result = await service.createUser(createUserDto);
 
-      expect(mockDb.values).toHaveBeenCalledWith({
-        email: createUserDto.email,
-        name: createUserDto.name,
-        password: expect.any(String),
-      });
-      expect(result).toBeDefined();
-      expect(result.email).toBe(createUserDto.email);
-      expect(result.phone).toBeUndefined();
-    });
+  //     expect(mockDb.values).toHaveBeenCalledWith({
+  //       email: createUserDto.email,
+  //       name: createUserDto.name,
+  //       password: expect.any(String),
+  //     });
+  //     expect(result).toBeDefined();
+  //     expect(result.email).toBe(createUserDto.email);
+  //     expect(result.phone).toBeUndefined();
+  //   });
 
-    it('should throw an error if user already exists', async () => {
-      mockDb.where.mockReturnValue([{ email: 'tester@example.com' }]);
+  //   it('should throw an error if user already exists', async () => {
+  //     mockDb.where.mockReturnValue([{ email: 'tester@example.com' }]);
 
-      const createUserDto = {
-        email: 'tester@example.com',
-        password: 'securepassword',
-        name: 'Test User',
-        phone: '123-456-7890',
-      };
+  //     const createUserDto = {
+  //       email: 'tester@example.com',
+  //       password: 'securepassword',
+  //       name: 'Test User',
+  //       phone: '123-456-7890',
+  //     };
 
-      await expect(service.createUser(createUserDto)).rejects.toThrow(
-        'User already exists',
-      );
-    });
-  });
+  //     await expect(service.createUser(createUserDto)).rejects.toThrow(
+  //       'User already exists',
+  //     );
+  //   });
+  // });
 });

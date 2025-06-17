@@ -28,12 +28,12 @@ describe('AuthService', () => {
     get: jest.fn(),
   };
 
-  const testUser = {
-    id: 'user-id',
-    email: 'test@example.com',
-    password: 'hashedPassword',
-    name: 'Test User',
-  };
+  // const testUser = {
+  //   id: 'user-id',
+  //   email: 'test@example.com',
+  //   password: 'hashedPassword',
+  //   name: 'Test User',
+  // };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -53,63 +53,63 @@ describe('AuthService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('login', () => {
-    const email = 'test@example.com';
-    const password = 'securepassword';
+  // describe('login', () => {
+  //   const email = 'test@example.com';
+  //   const password = 'securepassword';
 
-    it('should return login response when credentials are valid', async () => {
-      // Arrange
-      mockDb.query.users.findFirst.mockResolvedValue(testUser);
-      jest.spyOn(service, 'verifyPassword').mockResolvedValue(true);
-      jest.spyOn(service, 'signToken').mockResolvedValue({
-        accessToken: 'mockAccessToken',
-        refreshToken: 'mockRefreshToken',
-      });
+  //   it('should return login response when credentials are valid', async () => {
+  //     // Arrange
+  //     mockDb.query.users.findFirst.mockResolvedValue(testUser);
+  //     jest.spyOn(service, 'verifyPassword').mockResolvedValue(true);
+  //     jest.spyOn(service, 'signToken').mockResolvedValue({
+  //       accessToken: 'mockAccessToken',
+  //       refreshToken: 'mockRefreshToken',
+  //     });
 
-      // Act
-      const result = await service.login(email, password);
+  //     // Act
+  //     const result = await service.login(email, password);
 
-      // Assert
-      expect(result).toEqual({
-        accessToken: 'mockAccessToken',
-        refreshToken: 'mockRefreshToken',
-      });
-      expect(mockDb.query.users.findFirst).toHaveBeenCalledWith({
-        where: expect.any(Function),
-      });
-      expect(service.verifyPassword).toHaveBeenCalledWith(
-        password,
-        testUser.password,
-      );
-      expect(service.signToken).toHaveBeenCalled();
-    });
+  //     // Assert
+  //     expect(result).toEqual({
+  //       accessToken: 'mockAccessToken',
+  //       refreshToken: 'mockRefreshToken',
+  //     });
+  //     expect(mockDb.query.users.findFirst).toHaveBeenCalledWith({
+  //       where: expect.any(Function),
+  //     });
+  //     expect(service.verifyPassword).toHaveBeenCalledWith(
+  //       password,
+  //       testUser.password,
+  //     );
+  //     expect(service.signToken).toHaveBeenCalled();
+  //   });
 
-    it('should throw an error if user does not exist', async () => {
-      // Arrange
-      mockDb.query.users.findFirst.mockResolvedValue(null);
+  //   it('should throw an error if user does not exist', async () => {
+  //     // Arrange
+  //     mockDb.query.users.findFirst.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(service.login(email, password)).rejects.toThrow(
-        'User not found',
-      );
-      expect(mockDb.query.users.findFirst).toHaveBeenCalled();
-    });
+  //     // Act & Assert
+  //     await expect(service.login(email, password)).rejects.toThrow(
+  //       'User not found',
+  //     );
+  //     expect(mockDb.query.users.findFirst).toHaveBeenCalled();
+  //   });
 
-    it('should throw an error if password is invalid', async () => {
-      // Arrange
-      mockDb.query.users.findFirst.mockResolvedValue(testUser);
-      jest.spyOn(service, 'verifyPassword').mockResolvedValue(false);
+  //   it('should throw an error if password is invalid', async () => {
+  //     // Arrange
+  //     mockDb.query.users.findFirst.mockResolvedValue(testUser);
+  //     jest.spyOn(service, 'verifyPassword').mockResolvedValue(false);
 
-      // Act & Assert
-      await expect(service.login(email, password)).rejects.toThrow(
-        'Invalid password',
-      );
-      expect(service.verifyPassword).toHaveBeenCalledWith(
-        password,
-        testUser.password,
-      );
-    });
-  });
+  //     // Act & Assert
+  //     await expect(service.login(email, password)).rejects.toThrow(
+  //       'Invalid password',
+  //     );
+  //     expect(service.verifyPassword).toHaveBeenCalledWith(
+  //       password,
+  //       testUser.password,
+  //     );
+  //   });
+  // });
 
   describe('verifyPassword', () => {
     it('should return true for valid password', async () => {

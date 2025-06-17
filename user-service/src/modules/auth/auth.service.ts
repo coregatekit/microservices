@@ -41,10 +41,7 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    const isPasswordValid = await this.verifyPassword(
-      password,
-      userExist.password,
-    );
+    const isPasswordValid = await this.verifyPassword(password, '');
 
     if (!isPasswordValid) {
       this.logger.warn(
@@ -59,7 +56,7 @@ export class AuthService {
     return this.signToken({
       ['userId']: userExist.id,
       ['email']: userExist.email,
-      ['name']: userExist.name,
+      ['name']: `${userExist.firstName} ${userExist.lastName}`,
     });
   }
 

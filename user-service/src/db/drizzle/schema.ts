@@ -17,8 +17,6 @@ export const users = pgTable(
   {
     id: uuid().defaultRandom().primaryKey().notNull(),
     email: varchar({ length: 255 }).notNull(),
-    password: varchar({ length: 255 }).notNull(),
-    name: varchar({ length: 255 }).notNull(),
     phone: varchar({ length: 20 }),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
       .default(sql`(now() AT TIME ZONE 'utc'::text)`)
@@ -26,6 +24,8 @@ export const users = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
       .default(sql`(now() AT TIME ZONE 'utc'::text)`)
       .notNull(),
+    firstName: varchar('first_name', { length: 255 }).default('').notNull(),
+    lastName: varchar('last_name', { length: 255 }).default('').notNull(),
   },
   (table) => [
     index('idx_users_email').using(

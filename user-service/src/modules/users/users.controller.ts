@@ -36,7 +36,7 @@ export class UsersController {
     return {
       status: ResultStatus.SUCCESS,
       message: 'User created successfully',
-      data: await this.usersService.createUser(createUserDto),
+      data: await this.usersService.registerUser(createUserDto),
     };
   }
 }

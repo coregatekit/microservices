@@ -7,7 +7,7 @@ describe('UsersController', () => {
   let controller: UsersController;
 
   const mockUsersService = {
-    createUser: jest.fn(),
+    registerUser: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -34,37 +34,39 @@ describe('UsersController', () => {
     const createUserDto: CreateUserDto = {
       email: 'john@example.com',
       password: 'password',
-      name: 'John Doe',
+      firstName: 'John',
+      lastName: 'Doe',
     };
 
     const mockUser = {
       id: '1',
       email: 'john@example.com',
-      name: 'John Doe',
+      firstName: 'John',
+      lastName: 'Doe',
       phone: undefined,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     it('should create a user successfully', async () => {
-      mockUsersService.createUser.mockResolvedValue(mockUser);
+      mockUsersService.registerUser.mockResolvedValue(mockUser);
 
       const result = await controller.createUser(createUserDto);
 
       expect(result.data).toEqual(mockUser);
-      expect(mockUsersService.createUser).toHaveBeenCalledWith(createUserDto);
-      expect(mockUsersService.createUser).toHaveBeenCalledTimes(1);
+      expect(mockUsersService.registerUser).toHaveBeenCalledWith(createUserDto);
+      expect(mockUsersService.registerUser).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error if user creation fails', async () => {
       const errorMessage = 'User creation failed';
-      mockUsersService.createUser.mockRejectedValue(new Error(errorMessage));
+      mockUsersService.registerUser.mockRejectedValue(new Error(errorMessage));
 
       await expect(controller.createUser(createUserDto)).rejects.toThrow(
         errorMessage,
       );
-      expect(mockUsersService.createUser).toHaveBeenCalledWith(createUserDto);
-      expect(mockUsersService.createUser).toHaveBeenCalledTimes(1);
+      expect(mockUsersService.registerUser).toHaveBeenCalledWith(createUserDto);
+      expect(mockUsersService.registerUser).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -13,7 +13,11 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  name: string;
+  firstName: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  lastName: string;
 
   @ApiProperty()
   phone?: string;
