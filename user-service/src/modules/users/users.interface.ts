@@ -6,7 +6,8 @@ export type UserInsert = typeof users.$inferInsert;
 export interface UserResponse {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   phone?: string;
   createdAt: Date;
   updatedAt: Date;

@@ -88,6 +88,37 @@ export class UsersService {
       );
       throw new ConflictException('User already exists');
     }
-    return {} as UserResponse;
+
+    this.logger.log(
+      `Inserting new user into database: ${DataMasker.mask(createUserDto.email)}`,
+    );
+    const result = await this.db
+      .insert(schema.users)
+      .values({
+        email: createUserDto.email,
+        firstName: createUserDto.firstName,
+        lastName: createUserDto.lastName,
+        phone: createUserDto.phone,
+      })
+      .returning({
+        id: schema.users.id,
+        email: schema.users.email,
+        firstName: schema.users.firstName,
+        lastName: schema.users.lastName,
+        phone: schema.users.phone,
+        createdAt: schema.users.createdAt,
+        updatedAt: schema.users.updatedAt,
+      });
+
+    this.logger.log(`User created successfully with ID: ${result[0].id}`);
+    return {
+      id: result[0].id,
+      email: result[0].email,
+      firstName: result[0].firstName,
+      lastName: result[0].lastName,
+      phone: result[0].phone || undefined,
+      createdAt: new Date(result[0].createdAt),
+      updatedAt: new Date(result[0].updatedAt),
+    };
   }
 }

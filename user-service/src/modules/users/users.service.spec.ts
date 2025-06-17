@@ -137,6 +137,7 @@ describe('UsersService', () => {
       email: 'john@example.com',
       firstName: 'John',
       lastName: 'Doe',
+      phone: '123-456-7890',
       createdAt: new Date('2025-06-12T00:00:00Z'),
       updatedAt: new Date('2025-06-12T00:00:00Z'),
     };
@@ -161,6 +162,9 @@ describe('UsersService', () => {
       mockDb.select.mockReturnThis();
       mockDb.from.mockReturnThis();
       mockDb.where.mockReturnValue([]);
+      mockDb.insert.mockReturnThis();
+      mockDb.values.mockReturnThis();
+      mockDb.returning.mockResolvedValue([mockUserResponse]);
 
       const result = await service.registerUser(createUserDto);
 
