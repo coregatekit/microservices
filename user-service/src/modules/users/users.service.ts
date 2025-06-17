@@ -6,6 +6,7 @@ import { DrizzleAsyncProvider } from '../../db/db.provider';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { sql } from 'drizzle-orm';
 import { DataMasker } from '../../common/data-mask';
+import { KeycloakService } from '../keycloak/keycloak.service';
 
 @Injectable()
 export class UsersService {
@@ -14,6 +15,8 @@ export class UsersService {
   constructor(
     @Inject(DrizzleAsyncProvider)
     private readonly db: NodePgDatabase<typeof schema>,
+    @Inject(KeycloakService)
+    private readonly keycloakService: KeycloakService,
   ) {
     this.logger = new Logger(UsersService.name);
   }

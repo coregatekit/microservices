@@ -4,6 +4,7 @@ import { UsersService } from './users.service';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
 import * as schema from '../../db/drizzle/schema';
 import { sql } from 'drizzle-orm';
+import { KeycloakService } from '../keycloak/keycloak.service';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -15,6 +16,9 @@ describe('UsersService', () => {
     values: jest.fn().mockReturnThis(),
     returning: jest.fn(),
   };
+  const mockKeycloakService = {
+    createUser: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -23,6 +27,10 @@ describe('UsersService', () => {
         {
           provide: DrizzleAsyncProvider,
           useValue: mockDb,
+        },
+        {
+          provide: KeycloakService,
+          useValue: mockKeycloakService,
         },
       ],
     }).compile();

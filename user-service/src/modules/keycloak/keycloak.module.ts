@@ -10,5 +10,6 @@ import { HttpModule } from '@nestjs/axios';
     }),
   ],
   providers: [KeycloakService],
+  exports: [KeycloakService],
 })
 export class KeycloakModule {}
