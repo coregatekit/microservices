@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom } from 'rxjs';
 import {
   AccessTokenResponse,
   CreateKeycloakUserRequest,
@@ -34,7 +34,14 @@ export class KeycloakService {
 
     this.logger.log('Fetching access token from Keycloak');
     const { data } = await firstValueFrom(
-      this.httpService.post<AccessTokenResponse>(url, params),
+      this.httpService.post<AccessTokenResponse>(url, params).pipe(
+        catchError((error) => {
+          this.logger.error(
+            `Error fetching access token from Keycloak: ${error}`,
+          );
+          throw new Error('Failed to fetch access token from Keycloak');
+        }),
+      ),
     );
 
     if (!data || !data.access_token) {
@@ -69,12 +76,19 @@ export class KeycloakService {
 
     this.logger.log('Sending request to create user in Keycloak');
     const response = await firstValueFrom(
-      this.httpService.post(url, userPayload, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      }),
+      this.httpService
+        .post(url, userPayload, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        })
+        .pipe(
+          catchError((error) => {
+            this.logger.error(`Error creating user in Keycloak: ${error}`);
+            throw new Error('Failed to create user in Keycloak');
+          }),
+        ),
     );
 
     if (response.status !== 201) {
