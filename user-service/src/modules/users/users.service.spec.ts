@@ -140,6 +140,13 @@ describe('UsersService', () => {
       createdAt: new Date('2025-06-12T00:00:00Z'),
       updatedAt: new Date('2025-06-12T00:00:00Z'),
     };
+    const createUserDto = {
+      email: 'john@example.com',
+      password: 'securepassword',
+      firstName: 'John',
+      lastName: 'Doe',
+      phone: '123-456-7890',
+    };
 
     beforeEach(() => {
       mockDb.select.mockReset();
@@ -151,13 +158,6 @@ describe('UsersService', () => {
     });
 
     it('should register a user successfully with all fields', async () => {
-      const createUserDto = {
-        email: 'john@example.com',
-        password: 'securepassword',
-        firstName: 'John',
-        lastName: 'Doe',
-        phone: '123-456-7890',
-      };
       mockDb.select.mockReturnThis();
       mockDb.from.mockReturnThis();
       mockDb.where.mockReturnValue([]);
@@ -170,6 +170,21 @@ describe('UsersService', () => {
         sql`${schema.users.email} = ${createUserDto.email}`,
       );
       expect(result).toBeDefined();
+    });
+
+    it('should throw an error if user already exists', async () => {
+      mockDb.select.mockReturnThis();
+      mockDb.from.mockReturnThis();
+      mockDb.where.mockReturnValue([{ email: '' }]);
+
+      await expect(service.registerUser(createUserDto)).rejects.toThrow(
+        'User already exists',
+      );
+      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockDb.from).toHaveBeenCalledWith(schema.users);
+      expect(mockDb.where).toHaveBeenCalledWith(
+        sql`${schema.users.email} = ${createUserDto.email}`,
+      );
     });
   });
 });
