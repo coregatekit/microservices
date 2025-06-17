@@ -110,6 +110,17 @@ export class UsersService {
         updatedAt: schema.users.updatedAt,
       });
 
+    this.logger.log(
+      `Registering user in Keycloak: ${DataMasker.mask(createUserDto.email)}`,
+    );
+    await this.keycloakService.createUser({
+      uid: result[0].id,
+      email: createUserDto.email,
+      password: createUserDto.password,
+      firstName: createUserDto.firstName,
+      lastName: createUserDto.lastName,
+    });
+
     this.logger.log(`User created successfully with ID: ${result[0].id}`);
     return {
       id: result[0].id,

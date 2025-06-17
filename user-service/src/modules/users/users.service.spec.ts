@@ -165,6 +165,7 @@ describe('UsersService', () => {
       mockDb.insert.mockReturnThis();
       mockDb.values.mockReturnThis();
       mockDb.returning.mockResolvedValue([mockUserResponse]);
+      mockKeycloakService.createUser.mockResolvedValue({});
 
       const result = await service.registerUser(createUserDto);
 
@@ -173,6 +174,29 @@ describe('UsersService', () => {
       expect(mockDb.where).toHaveBeenCalledWith(
         sql`${schema.users.email} = ${createUserDto.email}`,
       );
+      expect(mockDb.insert).toHaveBeenCalledWith(schema.users);
+      expect(mockDb.values).toHaveBeenCalledWith({
+        email: createUserDto.email,
+        firstName: createUserDto.firstName,
+        lastName: createUserDto.lastName,
+        phone: createUserDto.phone,
+      });
+      expect(mockDb.returning).toHaveBeenCalledWith({
+        id: schema.users.id,
+        email: schema.users.email,
+        firstName: schema.users.firstName,
+        lastName: schema.users.lastName,
+        phone: schema.users.phone,
+        createdAt: schema.users.createdAt,
+        updatedAt: schema.users.updatedAt,
+      });
+      expect(mockKeycloakService.createUser).toHaveBeenCalledWith({
+        uid: mockUserResponse.id,
+        email: createUserDto.email,
+        password: createUserDto.password,
+        firstName: createUserDto.firstName,
+        lastName: createUserDto.lastName,
+      });
       expect(result).toBeDefined();
     });
 
@@ -189,6 +213,29 @@ describe('UsersService', () => {
       expect(mockDb.where).toHaveBeenCalledWith(
         sql`${schema.users.email} = ${createUserDto.email}`,
       );
+    });
+
+    it('should throw an error if Keycloak user creation fails', async () => {
+      mockDb.select.mockReturnThis();
+      mockDb.from.mockReturnThis();
+      mockDb.where.mockReturnValue([]);
+      mockDb.insert.mockReturnThis();
+      mockDb.values.mockReturnThis();
+      mockDb.returning.mockResolvedValue([mockUserResponse]);
+      mockKeycloakService.createUser.mockRejectedValue(
+        new Error('Failed to create user in Keycloak'),
+      );
+
+      await expect(service.registerUser(createUserDto)).rejects.toThrow(
+        'Failed to create user in Keycloak',
+      );
+      expect(mockKeycloakService.createUser).toHaveBeenCalledWith({
+        uid: mockUserResponse.id,
+        email: createUserDto.email,
+        password: createUserDto.password,
+        firstName: createUserDto.firstName,
+        lastName: createUserDto.lastName,
+      });
     });
   });
 });
