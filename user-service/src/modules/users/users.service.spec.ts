@@ -2,6 +2,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
+import * as schema from '../../db/drizzle/schema';
+import { sql } from 'drizzle-orm';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -120,4 +122,46 @@ describe('UsersService', () => {
   //     );
   //   });
   // });
+
+  describe('registerUser', () => {
+    const mockUserResponse = {
+      id: 'FA831B00-7E34-4062-94BE-F4AB15F3FBE3',
+      email: 'john@example.com',
+      firstName: 'John',
+      lastName: 'Doe',
+      createdAt: new Date('2025-06-12T00:00:00Z'),
+      updatedAt: new Date('2025-06-12T00:00:00Z'),
+    };
+
+    beforeEach(() => {
+      mockDb.select.mockReset();
+      mockDb.from.mockReset();
+      mockDb.where.mockReset();
+      mockDb.insert.mockReset();
+      mockDb.values.mockReset();
+      mockDb.returning.mockReset();
+    });
+
+    it('should register a user successfully with all fields', async () => {
+      const createUserDto = {
+        email: 'john@example.com',
+        password: 'securepassword',
+        firstName: 'John',
+        lastName: 'Doe',
+        phone: '123-456-7890',
+      };
+      mockDb.select.mockReturnThis();
+      mockDb.from.mockReturnThis();
+      mockDb.where.mockReturnValue([]);
+
+      const result = await service.registerUser(createUserDto);
+
+      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockDb.from).toHaveBeenCalledWith(schema.users);
+      expect(mockDb.where).toHaveBeenCalledWith(
+        sql`${schema.users.email} = ${createUserDto.email}`,
+      );
+      expect(result).toBeDefined();
+    });
+  });
 });

@@ -1,9 +1,11 @@
 import * as schema from '../../db/drizzle/schema';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './users';
 import { UserResponse } from './users.interface';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { sql } from 'drizzle-orm';
+import { DataMasker } from '../../common/data-mask';
 
 @Injectable()
 export class UsersService {
@@ -69,6 +71,20 @@ export class UsersService {
   // }
 
   async registerUser(createUserDto: CreateUserDto): Promise<UserResponse> {
+    this.logger.log(
+      `Creating user with email: ${DataMasker.mask(createUserDto.email)}`,
+    );
+    const userExists = await this.db
+      .select()
+      .from(schema.users)
+      .where(sql`${schema.users.email} = ${createUserDto.email}`);
+
+    if (userExists.length > 0) {
+      this.logger.warn(
+        `User with email ${DataMasker.mask(createUserDto.email)} already exists`,
+      );
+      throw new ConflictException('User already exists');
+    }
     return {} as UserResponse;
   }
 }
