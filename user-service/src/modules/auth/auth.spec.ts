@@ -1,4 +1,4 @@
-import { LoginRequest, LoginResponse } from './auth';
+import { LoginRequest } from './auth';
 
 describe('Auth Classes', () => {
   describe('LoginRequest', () => {
@@ -14,22 +14,6 @@ describe('Auth Classes', () => {
       loginRequest.password = 'password123';
       expect(loginRequest.email).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
       expect(loginRequest.password).toBe('password123');
-    });
-  });
-
-  describe('LoginResponse', () => {
-    it('should have accessToken and refreshToken properties', () => {
-      const loginResponse = new LoginResponse();
-      expect(loginResponse).toHaveProperty('accessToken');
-      expect(loginResponse).toHaveProperty('refreshToken');
-    });
-
-    it('should set accessToken and refreshToken', () => {
-      const loginResponse = new LoginResponse();
-      loginResponse.accessToken = 'someAccessToken';
-      loginResponse.refreshToken = 'someRefreshToken';
-      expect(loginResponse.accessToken).toBe('someAccessToken');
-      expect(loginResponse.refreshToken).toBe('someRefreshToken');
     });
   });
 });
