@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
 import { of } from 'rxjs';
-import { CreateKeycloakUser } from './keycloak';
+import { CreateKeycloakUser, LoginRequest } from './keycloak';
 
 describe('KeycloakService', () => {
   let service: KeycloakService;
@@ -21,6 +21,10 @@ describe('KeycloakService', () => {
           return 'mock-client-id';
         case 'KEYCLOAK_CLIENT_SECRET':
           return 'mock-client-secret';
+        case 'KEYCLOAK_CLIENT_ID_LOGIN_REQUEST':
+          return 'mock-client-id-login-request';
+        case 'KEYCLOAK_CLIENT_SECRET_LOGIN_REQUEST':
+          return 'mock-client-secret-login-request';
         default:
           return null;
       }
@@ -50,6 +54,54 @@ describe('KeycloakService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('login', () => {
+    it('should login to Keycloak', async () => {
+      const loginRequest = new LoginRequest('mock_username', 'mock_password');
+      mockHttpService.post.mockImplementation(() => {
+        const mockResponse: AxiosResponse = {
+          data: {
+            accessToken: 'mock_access_token',
+            refreshToken: 'mock_refresh_token',
+          },
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          config: { headers: {} as any },
+        };
+        return of(mockResponse);
+      });
+
+      const result = await service.login(loginRequest);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        'http://mock-keycloak-url/realms/mock-realm/protocol/openid-connect/token',
+        expect.any(URLSearchParams),
+      );
+      expect(result).toEqual({
+        accessToken: 'mock_access_token',
+        refreshToken: 'mock_refresh_token',
+      });
+    });
+
+    it('should throw an error if login fails', async () => {
+      const loginRequest = new LoginRequest('mock_username', 'mock_password');
+      mockHttpService.post.mockImplementation(() => {
+        const mockResponse: AxiosResponse = {
+          data: {},
+          status: 400,
+          statusText: 'Bad Request',
+          headers: {},
+          config: { headers: {} as any },
+        };
+        return of(mockResponse);
+      });
+
+      await expect(service.login(loginRequest)).rejects.toThrow(
+        'Failed to retrieve access token from Keycloak',
+      );
+    });
   });
 
   describe('getAccessToken', () => {

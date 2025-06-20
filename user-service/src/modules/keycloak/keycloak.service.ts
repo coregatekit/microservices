@@ -5,11 +5,19 @@ import { catchError, firstValueFrom } from 'rxjs';
 import {
   AccessTokenResponse,
   CreateKeycloakUserRequest,
+  KeycloakLoginResponse,
+  LoginResponse,
 } from './keycloak.type';
-import { CreateKeycloakUser } from './keycloak';
+import { CreateKeycloakUser, LoginRequest } from './keycloak';
 
 @Injectable()
 export class KeycloakService {
+  private readonly BASE_URL: string;
+  private readonly KEYCLOAK_REALM: string;
+  private readonly KEYCLOAK_CLIENT_ID: string;
+  private readonly KEYCLOAK_CLIENT_SECRET: string;
+  private readonly KEYCLOAK_CLIENT_ID_LOGIN_REQUEST: string;
+  private readonly KEYCLOAK_CLIENT_SECRET_LOGIN_REQUEST: string;
   private readonly logger: Logger;
 
   constructor(
@@ -17,6 +25,52 @@ export class KeycloakService {
     private configService: ConfigService,
   ) {
     this.logger = new Logger(KeycloakService.name);
+    this.BASE_URL = this.configService.get<string>('KEYCLOAK_BASE_URL') || '';
+    this.KEYCLOAK_REALM =
+      this.configService.get<string>('KEYCLOAK_REALM') || '';
+    this.KEYCLOAK_CLIENT_ID =
+      this.configService.get<string>('KEYCLOAK_CLIENT_ID') || '';
+    this.KEYCLOAK_CLIENT_SECRET =
+      this.configService.get<string>('KEYCLOAK_CLIENT_SECRET') || '';
+    this.KEYCLOAK_CLIENT_ID_LOGIN_REQUEST =
+      this.configService.get<string>('KEYCLOAK_CLIENT_ID_LOGIN_REQUEST') || '';
+    this.KEYCLOAK_CLIENT_SECRET_LOGIN_REQUEST =
+      this.configService.get<string>('KEYCLOAK_CLIENT_SECRET_LOGIN_REQUEST') ||
+      '';
+  }
+
+  async login(request: LoginRequest): Promise<LoginResponse> {
+    this.logger.log('Logging in to Keycloak');
+    const url = `${this.BASE_URL}/realms/${this.KEYCLOAK_REALM}/protocol/openid-connect/token`;
+    const params = new URLSearchParams();
+    params.append('client_id', this.KEYCLOAK_CLIENT_ID_LOGIN_REQUEST);
+    params.append('client_secret', this.KEYCLOAK_CLIENT_SECRET_LOGIN_REQUEST);
+    params.append('grant_type', 'password');
+    params.append('username', request.username);
+    params.append('password', request.password);
+    params.append('scope', 'openid profile email');
+
+    this.logger.log('Sending login request to Keycloak');
+
+    const { data } = await firstValueFrom(
+      this.httpService.post<KeycloakLoginResponse>(url, params).pipe(
+        catchError((error) => {
+          this.logger.error(`Error logging in to Keycloak: ${error}`);
+          throw new Error('Failed to login to Keycloak');
+        }),
+      ),
+    );
+
+    if (!data || !data.accessToken) {
+      this.logger.error('Failed to retrieve access token from Keycloak');
+      throw new Error('Failed to retrieve access token from Keycloak');
+    }
+
+    this.logger.log('Login successful, access token retrieved');
+    return {
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+    };
   }
 
   async getAccessToken(): Promise<string> {

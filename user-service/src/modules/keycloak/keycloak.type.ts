@@ -14,3 +14,20 @@ export type CreateKeycloakUserRequest = {
   }>;
   attributes?: Record<string, string>;
 };
+
+export type KeycloakLoginResponse = {
+  accessToken: string;
+  expiresIn: number;
+  refreshToken: string;
+  refreshExpiresIn: number;
+  tokenType: string;
+  idToken: string;
+  notBeforePolicy: number;
+  sessionState: string;
+  scope: string;
+};
+
+export type LoginResponse = {
+  accessToken: string;
+  refreshToken: string;
+};
