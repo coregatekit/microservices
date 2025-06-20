@@ -31,6 +31,7 @@ describe('KeycloakService', () => {
     }),
   };
   const mockHttpService = {
+    get: jest.fn(),
     post: jest.fn(),
   };
 
@@ -215,6 +216,61 @@ describe('KeycloakService', () => {
       await expect(service.createUser(data)).rejects.toThrow(
         'Failed to create user in Keycloak',
       );
+    });
+  });
+
+  describe('validateToken', () => {
+    it('should return user info from Keycloak', async () => {
+      const mockUserInfoResponse = {
+        sub: '12345',
+        uid: '12345',
+        email_verified: true,
+        name: 'John Doe',
+        preferred_username: 'johndoe',
+        given_name: 'John',
+        family_name: 'Doe',
+        email: 'john@example.com',
+      };
+      mockHttpService.get.mockImplementation(() => {
+        const mockResponse: AxiosResponse = {
+          data: mockUserInfoResponse,
+          status: 400,
+          statusText: 'Bad Request',
+          headers: {},
+          config: { headers: {} as any },
+        };
+        return of(mockResponse);
+      });
+
+      const result = await service.validateToken('mock_access_token');
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        'http://mock-keycloak-url/realms/mock-realm/protocol/openid-connect/userinfo',
+        {
+          headers: {
+            Authorization: 'Bearer mock_access_token',
+          },
+        },
+      );
+      expect(result).toEqual(mockUserInfoResponse);
+    });
+
+    it('should return null if token validation fails', async () => {
+      mockHttpService.get.mockImplementation(() => {
+        throw new Error('Token validation failed');
+      });
+
+      const result = await service.validateToken('invalid_token');
+
+      expect(mockHttpService.get).toHaveBeenCalledWith(
+        'http://mock-keycloak-url/realms/mock-realm/protocol/openid-connect/userinfo',
+        {
+          headers: {
+            Authorization: 'Bearer invalid_token',
+          },
+        },
+      );
+      expect(result).toBeNull();
     });
   });
 });

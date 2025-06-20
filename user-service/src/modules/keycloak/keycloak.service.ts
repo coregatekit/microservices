@@ -7,6 +7,7 @@ import {
   CreateKeycloakUserRequest,
   KeycloakLoginResponse,
   LoginResponse,
+  UserInfoResponse,
 } from './keycloak.type';
 import { CreateKeycloakUser, LoginRequest } from './keycloak';
 
@@ -147,5 +148,34 @@ export class KeycloakService {
     }
 
     this.logger.log('User created successfully in Keycloak');
+  }
+
+  async validateToken(token: string): Promise<UserInfoResponse | null> {
+    this.logger.log('Validating access token with Keycloak');
+
+    try {
+      const url = `${this.BASE_URL}/realms/${this.KEYCLOAK_REALM}/protocol/openid-connect/userinfo`;
+
+      const { data } = await firstValueFrom(
+        this.httpService
+          .get<UserInfoResponse>(url, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .pipe(
+            catchError((error) => {
+              this.logger.error(`Error validating token: ${error}`);
+              throw new Error('Failed to validate token');
+            }),
+          ),
+      );
+
+      this.logger.log('Token validated successfully');
+      return data;
+    } catch (error) {
+      this.logger.error(`Error validating token: ${error}`);
+      return null;
+    }
   }
 }
