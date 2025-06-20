@@ -6,12 +6,13 @@ import {
   Logger,
   Post,
 } from '@nestjs/common';
-import { LoginRequest, LoginResponse } from './auth';
+import { LoginRequest } from './auth';
 import { AuthService } from './auth.service';
 import { Public } from '../../decorators/public';
 import { HttpResponse } from '../../common/http-response';
 import { ResultStatus } from '../../common/enum/result';
 import { DataMasker } from '../../common/data-mask';
+import { LoginResponse } from './auth.type';
 
 @Controller('auth')
 export class AuthController {
@@ -25,8 +26,8 @@ export class AuthController {
 
   @Public()
   @HttpCode(HttpStatus.OK)
-  @Post('legacy/login')
-  async legacyLogin(
+  @Post('login')
+  async login(
     @Body() loginRequest: LoginRequest,
   ): Promise<HttpResponse<LoginResponse>> {
     this.logger.log(
@@ -35,7 +36,7 @@ export class AuthController {
     return {
       status: ResultStatus.SUCCESS,
       message: 'Login successful',
-      data: await this.authService.legacyLogin(
+      data: await this.authService.login(
         loginRequest.email,
         loginRequest.password,
       ),

@@ -16,14 +16,14 @@ export type CreateKeycloakUserRequest = {
 };
 
 export type KeycloakLoginResponse = {
-  accessToken: string;
-  expiresIn: number;
-  refreshToken: string;
-  refreshExpiresIn: number;
-  tokenType: string;
-  idToken: string;
-  notBeforePolicy: number;
-  sessionState: string;
+  access_token: string;
+  expires_in: number;
+  refresh_token: string;
+  refresh_expires_in: number;
+  token_type: string;
+  id_token: string;
+  not_before_policy: number;
+  session_state: string;
   scope: string;
 };
 

@@ -61,15 +61,15 @@ export class KeycloakService {
       ),
     );
 
-    if (!data || !data.accessToken) {
+    if (!data || !data.access_token) {
       this.logger.error('Failed to retrieve access token from Keycloak');
       throw new Error('Failed to retrieve access token from Keycloak');
     }
 
     this.logger.log('Login successful, access token retrieved');
     return {
-      accessToken: data.accessToken,
-      refreshToken: data.refreshToken,
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token,
     };
   }
 

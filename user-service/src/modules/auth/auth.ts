@@ -10,11 +10,3 @@ export class LoginRequest {
   @IsNotEmpty()
   password: string;
 }
-
-export class LoginResponse {
-  @ApiProperty()
-  accessToken: string;
-
-  @ApiProperty()
-  refreshToken: string;
-}

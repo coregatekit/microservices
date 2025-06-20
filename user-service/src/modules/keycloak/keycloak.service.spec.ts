@@ -62,8 +62,8 @@ describe('KeycloakService', () => {
       mockHttpService.post.mockImplementation(() => {
         const mockResponse: AxiosResponse = {
           data: {
-            accessToken: 'mock_access_token',
-            refreshToken: 'mock_refresh_token',
+            access_token: 'mock_access_token',
+            refresh_token: 'mock_refresh_token',
           },
           status: 200,
           statusText: 'OK',
