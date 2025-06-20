@@ -1,4 +1,4 @@
-import { CreateKeycloakUser } from './keycloak';
+import { CreateKeycloakUser, LoginRequest } from './keycloak';
 
 describe('Keycloak', () => {
   describe('CreateKeycloakUser', () => {
@@ -16,6 +16,15 @@ describe('Keycloak', () => {
       expect(dto.email).toBe('john@example.com');
       expect(dto.firstName).toBe('John');
       expect(dto.lastName).toBe('Doe');
+    });
+  });
+
+  describe('LoginRequest', () => {
+    it('should correctly parse username and password', () => {
+      const loginRequest = new LoginRequest('john_doe', 'secureP@ssw0rd');
+      expect(loginRequest).toBeDefined();
+      expect(loginRequest.username).toBe('john_doe');
+      expect(loginRequest.password).toBe('secureP@ssw0rd');
     });
   });
 });
