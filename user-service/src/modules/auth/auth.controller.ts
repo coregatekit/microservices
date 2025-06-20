@@ -25,8 +25,8 @@ export class AuthController {
 
   @Public()
   @HttpCode(HttpStatus.OK)
-  @Post('login')
-  async login(
+  @Post('legacy/login')
+  async legacyLogin(
     @Body() loginRequest: LoginRequest,
   ): Promise<HttpResponse<LoginResponse>> {
     this.logger.log(
@@ -35,7 +35,7 @@ export class AuthController {
     return {
       status: ResultStatus.SUCCESS,
       message: 'Login successful',
-      data: await this.authService.login(
+      data: await this.authService.legacyLogin(
         loginRequest.email,
         loginRequest.password,
       ),

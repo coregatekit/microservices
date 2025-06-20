@@ -6,7 +6,7 @@ describe('AuthController', () => {
   let controller: AuthController;
 
   const mockAuthService = {
-    login: jest.fn(),
+    legacyLogin: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -43,13 +43,13 @@ describe('AuthController', () => {
 
     it('should call AuthService.login with correct credentials', async () => {
       // Arrange
-      mockAuthService.login.mockResolvedValueOnce(loginResponse);
+      mockAuthService.legacyLogin.mockResolvedValueOnce(loginResponse);
 
       // Act
-      const result = await controller.login(loginRequest);
+      const result = await controller.legacyLogin(loginRequest);
 
       // Assert
-      expect(mockAuthService.login).toHaveBeenCalledWith(
+      expect(mockAuthService.legacyLogin).toHaveBeenCalledWith(
         loginRequest.email,
         loginRequest.password,
       );

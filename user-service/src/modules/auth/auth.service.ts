@@ -28,7 +28,7 @@ export class AuthService {
     this.logger = new Logger(AuthService.name);
   }
 
-  async login(email: string, password: string): Promise<LoginResponse> {
+  async legacyLogin(email: string, password: string): Promise<LoginResponse> {
     this.logger.log(
       `Checking credentials for user with email: ${DataMasker.mask(email)}`,
     );
