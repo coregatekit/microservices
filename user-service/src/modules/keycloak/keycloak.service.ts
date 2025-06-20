@@ -74,16 +74,10 @@ export class KeycloakService {
   }
 
   async getAccessToken(): Promise<string> {
-    const url = `${this.configService.get<string>('KEYCLOAK_BASE_URL')}/realms/${this.configService.get<string>('KEYCLOAK_REALM')}/protocol/openid-connect/token`;
+    const url = `${this.BASE_URL}/realms/${this.KEYCLOAK_REALM}/protocol/openid-connect/token`;
     const params = new URLSearchParams();
-    params.append(
-      'client_id',
-      this.configService.get<string>('KEYCLOAK_CLIENT_ID') || '',
-    );
-    params.append(
-      'client_secret',
-      this.configService.get<string>('KEYCLOAK_CLIENT_SECRET') || '',
-    );
+    params.append('client_id', this.KEYCLOAK_CLIENT_ID || '');
+    params.append('client_secret', this.KEYCLOAK_CLIENT_SECRET || '');
     params.append('grant_type', 'client_credentials');
 
     this.logger.log('Fetching access token from Keycloak');
@@ -109,7 +103,7 @@ export class KeycloakService {
   async createUser(userData: CreateKeycloakUser): Promise<void> {
     this.logger.log('Creating user in Keycloak');
     const accessToken = await this.getAccessToken();
-    const url = `${this.configService.get<string>('KEYCLOAK_BASE_URL')}/admin/realms/${this.configService.get<string>('KEYCLOAK_REALM')}/users`;
+    const url = `${this.BASE_URL}/admin/realms/${this.KEYCLOAK_REALM}/users`;
 
     const userPayload: CreateKeycloakUserRequest = {
       enabled: true,
