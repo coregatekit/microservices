@@ -49,4 +49,23 @@ describe('JwtService', () => {
       expect(result).toEqual(mockUserInfo);
     });
   });
+
+  describe('extractToken', () => {
+    it('should extract token from Authorization header', () => {
+      const authHeader = 'Bearer test-token';
+      const result = service.extractToken(authHeader);
+      expect(result).toBe('test-token');
+    });
+
+    it('should return null if Authorization header is not provided', () => {
+      const result = service.extractToken('');
+      expect(result).toBeNull();
+    });
+
+    it('should return null if Authorization header format is invalid', () => {
+      const authHeader = 'InvalidHeader test-token';
+      const result = service.extractToken(authHeader);
+      expect(result).toBeNull();
+    });
+  });
 });
