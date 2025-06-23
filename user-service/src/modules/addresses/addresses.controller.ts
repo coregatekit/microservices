@@ -14,6 +14,8 @@ import { AddAddressDto, UpdateAddressDto } from './addresses';
 import { ResultStatus } from '../..//common/enum/result';
 import { HttpResponse } from '../../common/http-response';
 import { AddressResponse } from './addresses.interface';
+import { CurrentUser } from '../auth/auth.decorator';
+import { UserInfoResponse } from '../keycloak/keycloak.type';
 
 @Controller('addresses')
 export class AddressesController {
@@ -29,27 +31,32 @@ export class AddressesController {
   @Post()
   async addNewAddress(
     @Body() addressData: AddAddressDto,
+    @CurrentUser() user: UserInfoResponse,
   ): Promise<HttpResponse<{ id: string }>> {
-    this.logger.log(
-      `Incoming request to add new address: ${addressData.userId}`,
-    );
+    this.logger.log(`Incoming request to add new address: ${user.uid}`);
+
+    const input = {
+      ...addressData,
+      userId: user.uid,
+    };
+
     return {
       status: ResultStatus.SUCCESS,
       message: 'Address added successfully',
-      data: await this.addressesService.addNewAddress(addressData),
+      data: await this.addressesService.addNewAddress(input),
     };
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('user/:userId')
+  @Get()
   async getUserAddresses(
-    @Param('userId') userId: string,
+    @CurrentUser() user: UserInfoResponse,
   ): Promise<HttpResponse<AddressResponse[]>> {
-    this.logger.log(`Incoming request to get addresses for user: ${userId}`);
+    this.logger.log(`Incoming request to get addresses for user: ${user.uid}`);
     return {
       status: ResultStatus.SUCCESS,
       message: 'Addresses retrieved successfully',
-      data: await this.addressesService.getUserAddresses(userId),
+      data: await this.addressesService.getUserAddresses(user.uid),
     };
   }
 

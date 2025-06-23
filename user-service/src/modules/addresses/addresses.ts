@@ -5,7 +5,6 @@ import { AddressType } from './addresses.enum';
 
 export class AddAddressDto {
   @ApiProperty()
-  @IsNotEmpty()
   userId: string;
 
   @ApiProperty()
