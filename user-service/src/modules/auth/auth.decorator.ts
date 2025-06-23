@@ -2,6 +2,7 @@ import { Request } from 'express';
 import {
   createParamDecorator,
   ExecutionContext,
+  SetMetadata,
   UnauthorizedException,
 } from '@nestjs/common';
 
@@ -16,3 +17,6 @@ export const CurrentUser = createParamDecorator(
     return request.user;
   },
 );
+
+export const IS_PUBLIC_KEY = 'isPublic';
+export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
