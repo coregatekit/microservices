@@ -12,6 +12,7 @@ import { UserResponse } from './users.interface';
 import { HttpResponse } from '../../common/http-response';
 import { ResultStatus } from '../../common/enum/result';
 import { DataMasker } from '../../common/data-mask';
+import { Public } from '../auth/auth.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -23,6 +24,7 @@ export class UsersController {
     this.logger = new Logger(UsersController.name);
   }
 
+  @Public()
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
   async createUser(

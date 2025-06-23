@@ -12,6 +12,7 @@ import { HttpResponse } from '../../common/http-response';
 import { ResultStatus } from '../../common/enum/result';
 import { DataMasker } from '../../common/data-mask';
 import { LoginResponse } from './auth.type';
+import { Public } from './auth.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -23,6 +24,7 @@ export class AuthController {
     this.logger = new Logger(AuthController.name);
   }
 
+  @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
