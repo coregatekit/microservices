@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
 import { KeycloakModule } from './modules/keycloak/keycloak.module';
+import { JwtModule } from './modules/jwt/jwt.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { KeycloakModule } from './modules/keycloak/keycloak.module';
     AuthModule,
     AddressesModule,
     KeycloakModule,
+    JwtModule,
   ],
   controllers: [],
   providers: [],
