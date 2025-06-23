@@ -1,4 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { KeycloakService } from '../keycloak/keycloak.service';
+import { UserInfoResponse } from '../keycloak/keycloak.type';
 
 @Injectable()
-export class JwtService {}
+export class JwtService {
+  private readonly logger: Logger;
+
+  constructor(private keycloakService: KeycloakService) {
+    this.logger = new Logger(JwtService.name);
+  }
+
+  async validateToken(token: string): Promise<UserInfoResponse | null> {
+    return this.keycloakService.validateToken(token);
+  }
+}
