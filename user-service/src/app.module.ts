@@ -8,6 +8,8 @@ import { AddressesModule } from './modules/addresses/addresses.module';
 import { KeycloakModule } from './modules/keycloak/keycloak.module';
 import { JwtModule } from './modules/jwt/jwt.module';
 import { AuthMiddleware } from './modules/auth/auth.middleware';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './modules/auth/auth.guard';
 
 @Module({
   imports: [
@@ -23,7 +25,12 @@ import { AuthMiddleware } from './modules/auth/auth.middleware';
     JwtModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
