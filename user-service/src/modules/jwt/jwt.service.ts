@@ -13,4 +13,9 @@ export class JwtService {
   async validateToken(token: string): Promise<UserInfoResponse | null> {
     return this.keycloakService.validateToken(token);
   }
+
+  decodeToken(token: string): Promise<any> {
+    this.logger.log('Method not implemented: decodeToken', token);
+    throw new Error('Method not implemented.');
+  }
 }
