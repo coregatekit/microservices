@@ -9,7 +9,6 @@ import {
 import { CreateUserDto } from './users';
 import { UsersService } from './users.service';
 import { UserResponse } from './users.interface';
-import { Public } from '../../decorators/public';
 import { HttpResponse } from '../../common/http-response';
 import { ResultStatus } from '../../common/enum/result';
 import { DataMasker } from '../../common/data-mask';
@@ -24,7 +23,6 @@ export class UsersController {
     this.logger = new Logger(UsersController.name);
   }
 
-  @Public()
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
   async createUser(

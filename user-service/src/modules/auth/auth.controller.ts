@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { LoginRequest } from './auth';
 import { AuthService } from './auth.service';
-import { Public } from '../../decorators/public';
 import { HttpResponse } from '../../common/http-response';
 import { ResultStatus } from '../../common/enum/result';
 import { DataMasker } from '../../common/data-mask';
@@ -24,7 +23,6 @@ export class AuthController {
     this.logger = new Logger(AuthController.name);
   }
 
-  @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
