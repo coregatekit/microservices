@@ -7,15 +7,6 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '../jwt/jwt.service';
 import { Request } from 'express';
-import { UserInfoResponse } from '../keycloak/keycloak.type';
-
-// Extend the Express Request interface
-declare module 'express' {
-  interface Request {
-    user?: UserInfoResponse;
-    token?: string;
-  }
-}
 
 @Injectable()
 export class AuthGuard implements CanActivate {
