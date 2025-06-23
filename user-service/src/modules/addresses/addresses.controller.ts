@@ -61,43 +61,43 @@ export class AddressesController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('user/:userId/:addressId')
+  @Get(':addressId')
   async getAddressDetail(
-    @Param('userId') userId: string,
+    @CurrentUser() user: UserInfoResponse,
     @Param('addressId') addressId: string,
   ): Promise<HttpResponse<AddressResponse>> {
     this.logger.log('Incoming request to get all addresses');
     return {
       status: ResultStatus.SUCCESS,
       message: 'Address retrieved successfully',
-      data: await this.addressesService.getAddressById(userId, addressId),
+      data: await this.addressesService.getAddressById(addressId, user.uid),
     };
   }
 
   @HttpCode(HttpStatus.OK)
   @Get('user/:userId/default')
   async getUserDefaultAddress(
-    @Param('userId') userId: string,
+    @CurrentUser() user: UserInfoResponse,
   ): Promise<HttpResponse<AddressResponse[]>> {
     this.logger.log(
-      `Incoming request to get default address for user: ${userId}`,
+      `Incoming request to get default address for user: ${user.uid}`,
     );
     return {
       status: ResultStatus.SUCCESS,
       message: 'Default address retrieved successfully',
-      data: await this.addressesService.getUserDefaultAddress(userId),
+      data: await this.addressesService.getUserDefaultAddress(user.uid),
     };
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('user/:userId/:addressId/update')
   async updateAddress(
-    @Param('userId') userId: string,
+    @CurrentUser() user: UserInfoResponse,
     @Param('addressId') addressId: string,
     @Body() body: UpdateAddressDto,
   ): Promise<HttpResponse<{ id: string }>> {
     this.logger.log(
-      `Incoming request to update address for user: ${userId}, addressId: ${addressId}`,
+      `Incoming request to update address for user: ${user.uid}, addressId: ${addressId}`,
     );
 
     if (!body || !body.type) {
@@ -113,19 +113,23 @@ export class AddressesController {
     return {
       status: ResultStatus.SUCCESS,
       message: 'Address updated successfully',
-      data: await this.addressesService.updateAddress(userId, addressId, body),
+      data: await this.addressesService.updateAddress(
+        user.uid,
+        addressId,
+        body,
+      ),
     };
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('user/:userId/:addressId/default')
   async setDefaultAddress(
-    @Param('userId') userId: string,
+    @CurrentUser() user: UserInfoResponse,
     @Param('addressId') addressId: string,
     @Body() body: UpdateAddressDto,
   ): Promise<HttpResponse<{ id: string }>> {
     this.logger.log(
-      `Incoming request to set default address for user: ${userId}, addressId: ${addressId}`,
+      `Incoming request to set default address for user: ${user.uid}, addressId: ${addressId}`,
     );
 
     if (!body || !body.type) {
@@ -142,7 +146,7 @@ export class AddressesController {
       status: ResultStatus.SUCCESS,
       message: 'Default address updated successfully',
       data: await this.addressesService.changeUserDefaultAddress(
-        userId,
+        user.uid,
         addressId,
         body.type,
       ),
