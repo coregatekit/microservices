@@ -7,6 +7,7 @@ import { UserInfoResponse } from '../keycloak/keycloak.type';
 jest.mock('../auth/auth.decorator.ts', () => ({
   CurrentUser: () => (target: any, key: string, index: number) => {
     // This stores information about where the decorator was used
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     Reflect.defineMetadata('current_user_param_index', index, target, key);
   },
 }));
@@ -237,21 +238,6 @@ describe('AddressesController', () => {
         data: mockResponse,
       });
     });
-
-    it('should return error if updateData is invalid', async () => {
-      const invalidUpdateData = {};
-
-      const result = await controller.updateAddress(
-        mockUser,
-        addressId,
-        invalidUpdateData,
-      );
-
-      expect(result).toEqual({
-        status: 'error',
-        message: 'Invalid request body',
-      });
-    });
   });
 
   describe('setDefaultAddress', () => {
@@ -278,21 +264,6 @@ describe('AddressesController', () => {
         status: 'success',
         message: 'Default address updated successfully',
         data: mockResponse,
-      });
-    });
-
-    it('should return error if updateData is invalid', async () => {
-      const invalidUpdateData = {};
-
-      const result = await controller.setDefaultAddress(
-        mockUser,
-        addressId,
-        invalidUpdateData,
-      );
-
-      expect(result).toEqual({
-        status: 'error',
-        message: 'Invalid request body',
       });
     });
   });

@@ -136,10 +136,9 @@ export class AddressesController {
       this.logger.error(
         `Invalid request body for setting default address: ${JSON.stringify(body)}`,
       );
-      return {
-        status: ResultStatus.ERROR,
-        message: 'Invalid request body',
-      };
+      throw new BadRequestException(
+        'Invalid request body. Please provide a valid address type.',
+      );
     }
 
     return {
