@@ -9,6 +9,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { AddressesService } from './addresses.service';
 import { AddAddressDto, UpdateAddressDto } from './addresses';
@@ -51,13 +52,14 @@ export class AddressesController {
   @HttpCode(HttpStatus.OK)
   @Get()
   async getUserAddresses(
+    @Query('type') type: string,
     @CurrentUser() user: UserInfoResponse,
   ): Promise<HttpResponse<AddressResponse[]>> {
     this.logger.log(`Incoming request to get addresses for user: ${user.uid}`);
     return {
       status: ResultStatus.SUCCESS,
       message: 'Addresses retrieved successfully',
-      data: await this.addressesService.getUserAddresses(user.uid),
+      data: await this.addressesService.getUserAddresses(user.uid, type),
     };
   }
 

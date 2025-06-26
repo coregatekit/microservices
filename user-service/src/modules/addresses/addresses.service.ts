@@ -73,12 +73,22 @@ export class AddressesService {
     return { id: result[0].id };
   }
 
-  async getUserAddresses(userId: string): Promise<AddressResponse[]> {
+  async getUserAddresses(
+    userId: string,
+    type?: string,
+  ): Promise<AddressResponse[]> {
     this.logger.log(`Fetching addresses for user ID: ${userId}`);
+
+    const conditions = [eq(schema.addresses.userId, userId)];
+    if (type) {
+      this.logger.log(`Filtering addresses by type: ${type}`);
+      conditions.push(eq(schema.addresses.type, type));
+    }
+
     const addresses = await this.db
       .select()
       .from(schema.addresses)
-      .where(sql`${schema.addresses.userId} = ${userId}`);
+      .where(and(...conditions));
 
     if (addresses.length === 0) {
       this.logger.warn(`No addresses found for user ID: ${userId}`);
