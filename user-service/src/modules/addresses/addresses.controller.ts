@@ -91,6 +91,37 @@ export class AddressesController {
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('default/:addressId')
+  async setDefaultAddress(
+    @CurrentUser() user: UserInfoResponse,
+    @Param('addressId') addressId: string,
+    @Body() body: UpdateAddressDto,
+  ): Promise<HttpResponse<{ id: string }>> {
+    this.logger.log(
+      `Incoming request to set default address for user: ${user.uid}, addressId: ${addressId}`,
+    );
+
+    if (!body || !body.type) {
+      this.logger.error(
+        `Invalid request body for setting default address: ${JSON.stringify(body)}`,
+      );
+      throw new BadRequestException(
+        'Invalid request body. Please provide a valid address type.',
+      );
+    }
+
+    return {
+      status: ResultStatus.SUCCESS,
+      message: 'Default address updated successfully',
+      data: await this.addressesService.changeUserDefaultAddress(
+        user.uid,
+        addressId,
+        body.type,
+      ),
+    };
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Patch(':addressId')
   async updateAddress(
     @CurrentUser() user: UserInfoResponse,
@@ -117,37 +148,6 @@ export class AddressesController {
         user.uid,
         addressId,
         body,
-      ),
-    };
-  }
-
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Patch('user/:userId/:addressId/default')
-  async setDefaultAddress(
-    @CurrentUser() user: UserInfoResponse,
-    @Param('addressId') addressId: string,
-    @Body() body: UpdateAddressDto,
-  ): Promise<HttpResponse<{ id: string }>> {
-    this.logger.log(
-      `Incoming request to set default address for user: ${user.uid}, addressId: ${addressId}`,
-    );
-
-    if (!body || !body.type) {
-      this.logger.error(
-        `Invalid request body for setting default address: ${JSON.stringify(body)}`,
-      );
-      throw new BadRequestException(
-        'Invalid request body. Please provide a valid address type.',
-      );
-    }
-
-    return {
-      status: ResultStatus.SUCCESS,
-      message: 'Default address updated successfully',
-      data: await this.addressesService.changeUserDefaultAddress(
-        user.uid,
-        addressId,
-        body.type,
       ),
     };
   }
