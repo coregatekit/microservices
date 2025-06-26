@@ -31,7 +31,7 @@ export class AuthController {
     @Body() loginRequest: LoginRequest,
   ): Promise<HttpResponse<LoginResponse>> {
     this.logger.log(
-      `Login attempt for user with email: ${DataMasker.mask(loginRequest.email)}`,
+      `Incoming login request for user with email: ${DataMasker.mask(loginRequest.email)}`,
     );
     return {
       status: ResultStatus.SUCCESS,
@@ -40,6 +40,29 @@ export class AuthController {
         loginRequest.email,
         loginRequest.password,
       ),
+    };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  async logout(
+    @Body('refreshToken') refreshToken: string,
+  ): Promise<HttpResponse<{ success: boolean; message: string }>> {
+    this.logger.log('Incoming logout request');
+
+    const result = await this.authService.logout(refreshToken);
+
+    if (!result.success) {
+      this.logger.error('Logout failed: No result returned');
+      return {
+        status: ResultStatus.ERROR,
+        message: 'Logout failed',
+      };
+    }
+
+    return {
+      status: ResultStatus.SUCCESS,
+      message: 'Logout successful',
     };
   }
 }
