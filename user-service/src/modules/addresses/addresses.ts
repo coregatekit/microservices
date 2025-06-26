@@ -48,8 +48,7 @@ export class UpdateAddressDto {
   userId?: string;
 
   @ApiProperty()
-  @IsOptional()
-  type?: AddressType;
+  type: AddressType;
 
   @ApiProperty()
   @IsOptional()

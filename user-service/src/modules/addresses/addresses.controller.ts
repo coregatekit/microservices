@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -90,7 +91,7 @@ export class AddressesController {
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Patch('user/:userId/:addressId/update')
+  @Patch(':addressId')
   async updateAddress(
     @CurrentUser() user: UserInfoResponse,
     @Param('addressId') addressId: string,
@@ -104,10 +105,9 @@ export class AddressesController {
       this.logger.error(
         `Invalid request body for updating address: ${JSON.stringify(body)}`,
       );
-      return {
-        status: ResultStatus.ERROR,
-        message: 'Invalid request body',
-      };
+      throw new BadRequestException(
+        'Invalid request body. Please provide a valid address type.',
+      );
     }
 
     return {
