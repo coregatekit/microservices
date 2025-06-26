@@ -24,8 +24,8 @@ describe('AddressesService', () => {
     insert: jest.fn().mockReturnThis(),
     values: jest.fn().mockReturnThis(),
     returning: jest.fn(),
-    update: jest.fn(),
-    set: jest.fn(),
+    update: jest.fn().mockReturnThis(),
+    set: jest.fn().mockReturnThis(),
   };
 
   const testAddress: AddAddressDto = {
@@ -89,6 +89,8 @@ describe('AddressesService', () => {
       mockDb.insert.mockReset();
       mockDb.values.mockReset();
       mockDb.returning.mockReset();
+      mockDb.update.mockReset();
+      mockDb.set.mockReset();
     });
 
     it('should add a new address successfully', async () => {
@@ -96,6 +98,9 @@ describe('AddressesService', () => {
       mockDb.query.users.findFirst.mockResolvedValue({
         id: testAddress.userId,
       });
+      mockDb.update.mockReturnValue(mockDb);
+      mockDb.set.mockReturnValue(mockDb);
+      mockDb.where.mockResolvedValue(undefined); // For the update operation
       mockDb.insert.mockReturnValue(mockDb);
       mockDb.values.mockReturnValue(mockDb);
       mockDb.returning.mockResolvedValue([{ id: mockAddress.id }]);
@@ -117,6 +122,40 @@ describe('AddressesService', () => {
         country: testAddress.country,
         isDefault: testAddress.isDefault,
       });
+      // Verify that default address logic was called since isDefault is true
+      expect(mockDb.update).toHaveBeenCalled();
+      expect(mockDb.set).toHaveBeenCalledWith({ isDefault: false });
+    });
+
+    it('should add a new non-default address without updating existing defaults', async () => {
+      // Arrange
+      const nonDefaultAddress = { ...testAddress, isDefault: false };
+      mockDb.query.users.findFirst.mockResolvedValue({
+        id: testAddress.userId,
+      });
+      mockDb.insert.mockReturnValue(mockDb);
+      mockDb.values.mockReturnValue(mockDb);
+      mockDb.returning.mockResolvedValue([{ id: mockAddress.id }]);
+
+      // Act
+      const result = await service.addNewAddress(nonDefaultAddress);
+
+      // Assert
+      expect(result).toEqual({ id: mockAddress.id });
+      expect(mockDb.insert).toHaveBeenCalledWith(expect.anything());
+      expect(mockDb.values).toHaveBeenCalledWith({
+        userId: nonDefaultAddress.userId,
+        type: nonDefaultAddress.type,
+        addressLine1: nonDefaultAddress.addressLine1,
+        addressLine2: nonDefaultAddress.addressLine2,
+        city: nonDefaultAddress.city,
+        state: nonDefaultAddress.state,
+        postalCode: nonDefaultAddress.postalCode,
+        country: nonDefaultAddress.country,
+        isDefault: nonDefaultAddress.isDefault,
+      });
+      // Verify that default address logic was NOT called since isDefault is false
+      expect(mockDb.update).not.toHaveBeenCalled();
     });
 
     it('should throw an error if user does not exist', async () => {
@@ -134,6 +173,9 @@ describe('AddressesService', () => {
       mockDb.query.users.findFirst.mockResolvedValue({
         id: testAddress.userId,
       });
+      mockDb.update.mockReturnValue(mockDb);
+      mockDb.set.mockReturnValue(mockDb);
+      mockDb.where.mockResolvedValue(undefined); // For the update operation
       mockDb.insert.mockReturnValue(mockDb);
       mockDb.values.mockReturnValue(mockDb);
       mockDb.returning.mockRejectedValue(new Error('Database error'));
@@ -298,6 +340,7 @@ describe('AddressesService', () => {
       mockDb.where.mockReset();
       mockDb.update.mockClear();
       mockDb.set.mockClear();
+      mockDb.query.addresses.findFirst.mockReset();
     });
 
     it('should update an address successfully', async () => {
@@ -317,6 +360,33 @@ describe('AddressesService', () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         where: expect.anything(),
       });
+    });
+
+    it('should update an address to default and reset other default addresses of same type', async () => {
+      // Arrange
+      const updateDataWithDefault = { ...updateData, isDefault: true };
+      mockDb.query.addresses.findFirst.mockResolvedValue(mockAddress);
+      mockDb.update.mockReturnThis();
+      mockDb.set.mockReturnThis();
+      mockDb.where.mockReturnThis();
+      mockDb.returning = jest.fn().mockResolvedValue([{ id: addressId }]);
+
+      // Act
+      const result = await service.updateAddress(
+        userId,
+        addressId,
+        updateDataWithDefault,
+      );
+
+      // Assert
+      expect(result).toEqual({ id: addressId });
+      expect(mockDb.query.addresses.findFirst).toHaveBeenCalledWith({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        where: expect.anything(),
+      });
+      // Should be called twice - once for resetting defaults, once for the actual update
+      expect(mockDb.update).toHaveBeenCalledTimes(2);
+      expect(mockDb.set).toHaveBeenCalledWith({ isDefault: false });
     });
 
     it('should throw an error if address not found for user', async () => {

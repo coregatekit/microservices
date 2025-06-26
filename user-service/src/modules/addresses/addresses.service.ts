@@ -49,6 +49,21 @@ export class AddressesService {
       throw new BadRequestException(`User with ID ${userId} does not exist`);
     }
 
+    // If the new address is set as default, reset all existing default addresses of the same type to false
+    if (isDefault) {
+      this.logger.log(
+        `New address is set as default. Resetting all existing default addresses of type ${type} for user ID: ${userId}`,
+      );
+      await this.db
+        .update(schema.addresses)
+        .set({
+          isDefault: false,
+        })
+        .where(
+          sql`${schema.addresses.userId} = ${userId} AND ${schema.addresses.type} = ${type} AND ${schema.addresses.isDefault} = true`,
+        );
+    }
+
     this.logger.log(`Adding new address for user ID: ${userId}, type: ${type}`);
     const result = await this.db
       .insert(schema.addresses)
@@ -174,6 +189,22 @@ export class AddressesService {
       throw new NotFoundException(
         `Address with ID: ${addressId} not found for user ID: ${userId}`,
       );
+    }
+
+    // If the address is being updated to be the default, reset all existing default addresses of the same type to false
+    if (updateData.isDefault === true) {
+      const addressType = updateData.type || address.type;
+      this.logger.log(
+        `Address is being set as default. Resetting all existing default addresses of type ${addressType} for user ID: ${userId}`,
+      );
+      await this.db
+        .update(schema.addresses)
+        .set({
+          isDefault: false,
+        })
+        .where(
+          sql`${schema.addresses.userId} = ${userId} AND ${schema.addresses.type} = ${addressType} AND ${schema.addresses.isDefault} = true`,
+        );
     }
 
     this.logger.log(
