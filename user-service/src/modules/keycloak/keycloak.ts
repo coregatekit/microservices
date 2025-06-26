@@ -23,3 +23,11 @@ export class LoginRequest {
     this.password = password;
   }
 }
+
+export class LogoutRequest {
+  refreshToken: string;
+
+  constructor(refreshToken: string) {
+    this.refreshToken = refreshToken;
+  }
+}

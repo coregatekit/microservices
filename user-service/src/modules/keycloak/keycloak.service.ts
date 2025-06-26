@@ -7,9 +7,10 @@ import {
   CreateKeycloakUserRequest,
   KeycloakLoginResponse,
   LoginResponse,
+  LogoutResponse,
   UserInfoResponse,
 } from './keycloak.type';
-import { CreateKeycloakUser, LoginRequest } from './keycloak';
+import { CreateKeycloakUser, LoginRequest, LogoutRequest } from './keycloak';
 
 @Injectable()
 export class KeycloakService {
@@ -176,6 +177,51 @@ export class KeycloakService {
     } catch (error) {
       this.logger.error(`Error validating token: ${error}`);
       return null;
+    }
+  }
+
+  async logout(request: LogoutRequest): Promise<LogoutResponse> {
+    this.logger.log('Logging out from Keycloak');
+
+    try {
+      const url = `${this.BASE_URL}/realms/${this.KEYCLOAK_REALM}/protocol/openid-connect/logout`;
+      const params = new URLSearchParams();
+      params.append('client_id', this.KEYCLOAK_CLIENT_ID_LOGIN_REQUEST);
+      params.append('client_secret', this.KEYCLOAK_CLIENT_SECRET_LOGIN_REQUEST);
+      params.append('refresh_token', request.refreshToken);
+
+      this.logger.log('Sending logout request to Keycloak');
+
+      const response = await firstValueFrom(
+        this.httpService.post(url, params).pipe(
+          catchError((error) => {
+            this.logger.error(`Error logging out from Keycloak: ${error}`);
+            throw new Error('Failed to logout from Keycloak');
+          }),
+        ),
+      );
+
+      if (response.status === 204 || response.status === 200) {
+        this.logger.log('User logged out successfully from Keycloak');
+        return {
+          success: true,
+          message: 'Logout successful',
+        };
+      } else {
+        this.logger.error(
+          `Failed to logout from Keycloak: ${response.statusText}`,
+        );
+        return {
+          success: false,
+          message: 'Logout failed',
+        };
+      }
+    } catch (error) {
+      this.logger.error(`Error during logout: ${error}`);
+      return {
+        success: false,
+        message: 'Logout failed due to an error',
+      };
     }
   }
 }

@@ -32,6 +32,11 @@ export type LoginResponse = {
   refreshToken: string;
 };
 
+export type LogoutResponse = {
+  success: boolean;
+  message: string;
+};
+
 export type UserInfoResponse = {
   sub: string;
   uid: string;

@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
 import { of } from 'rxjs';
-import { CreateKeycloakUser, LoginRequest } from './keycloak';
+import { CreateKeycloakUser, LoginRequest, LogoutRequest } from './keycloak';
 
 describe('KeycloakService', () => {
   let service: KeycloakService;
@@ -271,6 +271,130 @@ describe('KeycloakService', () => {
         },
       );
       expect(result).toBeNull();
+    });
+  });
+
+  describe('logout', () => {
+    it('should logout successfully from Keycloak', async () => {
+      const logoutRequest = new LogoutRequest('mock_refresh_token');
+      mockHttpService.post.mockImplementation(() => {
+        const mockResponse: AxiosResponse = {
+          data: {},
+          status: 204,
+          statusText: 'No Content',
+          headers: {},
+          config: { headers: {} as any },
+        };
+        return of(mockResponse);
+      });
+
+      const result = await service.logout(logoutRequest);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        'http://mock-keycloak-url/realms/mock-realm/protocol/openid-connect/logout',
+        expect.any(URLSearchParams),
+      );
+      expect(result).toEqual({
+        success: true,
+        message: 'Logout successful',
+      });
+    });
+
+    it('should logout successfully from Keycloak with status 200', async () => {
+      const logoutRequest = new LogoutRequest('mock_refresh_token');
+      mockHttpService.post.mockImplementation(() => {
+        const mockResponse: AxiosResponse = {
+          data: {},
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          config: { headers: {} as any },
+        };
+        return of(mockResponse);
+      });
+
+      const result = await service.logout(logoutRequest);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        'http://mock-keycloak-url/realms/mock-realm/protocol/openid-connect/logout',
+        expect.any(URLSearchParams),
+      );
+      expect(result).toEqual({
+        success: true,
+        message: 'Logout successful',
+      });
+    });
+
+    it('should return failure when logout request fails with non-success status', async () => {
+      const logoutRequest = new LogoutRequest('mock_refresh_token');
+      mockHttpService.post.mockImplementation(() => {
+        const mockResponse: AxiosResponse = {
+          data: {},
+          status: 400,
+          statusText: 'Bad Request',
+          headers: {},
+          config: { headers: {} as any },
+        };
+        return of(mockResponse);
+      });
+
+      const result = await service.logout(logoutRequest);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        'http://mock-keycloak-url/realms/mock-realm/protocol/openid-connect/logout',
+        expect.any(URLSearchParams),
+      );
+      expect(result).toEqual({
+        success: false,
+        message: 'Logout failed',
+      });
+    });
+
+    it('should handle logout error and return failure response', async () => {
+      const logoutRequest = new LogoutRequest('mock_refresh_token');
+      mockHttpService.post.mockImplementation(() => {
+        throw new Error('Network error');
+      });
+
+      const result = await service.logout(logoutRequest);
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        'http://mock-keycloak-url/realms/mock-realm/protocol/openid-connect/logout',
+        expect.any(URLSearchParams),
+      );
+      expect(result).toEqual({
+        success: false,
+        message: 'Logout failed due to an error',
+      });
+    });
+
+    it('should send correct parameters in logout request', async () => {
+      const logoutRequest = new LogoutRequest('test_refresh_token');
+      mockHttpService.post.mockImplementation(() => {
+        const mockResponse: AxiosResponse = {
+          data: {},
+          status: 204,
+          statusText: 'No Content',
+          headers: {},
+          config: { headers: {} as any },
+        };
+        return of(mockResponse);
+      });
+
+      await service.logout(logoutRequest);
+
+      const expectedParams = new URLSearchParams();
+      expectedParams.append('client_id', 'mock-client-id-login-request');
+      expectedParams.append(
+        'client_secret',
+        'mock-client-secret-login-request',
+      );
+      expectedParams.append('refresh_token', 'test_refresh_token');
+
+      expect(mockHttpService.post).toHaveBeenCalledWith(
+        'http://mock-keycloak-url/realms/mock-realm/protocol/openid-connect/logout',
+        expectedParams,
+      );
     });
   });
 });
