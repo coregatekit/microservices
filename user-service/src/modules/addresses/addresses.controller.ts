@@ -61,21 +61,7 @@ export class AddressesController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get(':addressId')
-  async getAddressDetail(
-    @CurrentUser() user: UserInfoResponse,
-    @Param('addressId') addressId: string,
-  ): Promise<HttpResponse<AddressResponse>> {
-    this.logger.log('Incoming request to get all addresses');
-    return {
-      status: ResultStatus.SUCCESS,
-      message: 'Address retrieved successfully',
-      data: await this.addressesService.getAddressById(addressId, user.uid),
-    };
-  }
-
-  @HttpCode(HttpStatus.OK)
-  @Get('user/:userId/default')
+  @Get('default')
   async getUserDefaultAddress(
     @CurrentUser() user: UserInfoResponse,
   ): Promise<HttpResponse<AddressResponse[]>> {
@@ -86,6 +72,20 @@ export class AddressesController {
       status: ResultStatus.SUCCESS,
       message: 'Default address retrieved successfully',
       data: await this.addressesService.getUserDefaultAddress(user.uid),
+    };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get(':addressId')
+  async getAddressDetail(
+    @CurrentUser() user: UserInfoResponse,
+    @Param('addressId') addressId: string,
+  ): Promise<HttpResponse<AddressResponse>> {
+    this.logger.log('Incoming request to get all addresses');
+    return {
+      status: ResultStatus.SUCCESS,
+      message: 'Address retrieved successfully',
+      data: await this.addressesService.getAddressById(addressId, user.uid),
     };
   }
 

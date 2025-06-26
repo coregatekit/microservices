@@ -10,7 +10,7 @@ import { DrizzleAsyncProvider } from '../../db/db.provider';
 import * as schema from '../../db/drizzle/schema';
 import { AddAddressDto, transformAddressResponse } from './addresses';
 import { AddAddressResponse, AddressResponse } from './addresses.interface';
-import { sql } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { AddressType } from './addresses.enum';
 
 @Injectable()
@@ -95,7 +95,10 @@ export class AddressesService {
       .select()
       .from(schema.addresses)
       .where(
-        sql`${schema.addresses.userId} = ${userId} AND ${schema.addresses.isDefault} = true`,
+        and(
+          eq(schema.addresses.userId, userId),
+          eq(schema.addresses.isDefault, true),
+        ),
       );
 
     if (addresses.length === 0) {

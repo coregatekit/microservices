@@ -2,6 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AddressesController } from './addresses.controller';
 import { AddressesService } from './addresses.service';
 import { AddressType } from './addresses.enum';
+import { UserInfoResponse } from '../keycloak/keycloak.type';
+
+jest.mock('../auth/auth.decorator.ts', () => ({
+  CurrentUser: () => (target: any, key: string, index: number) => {
+    // This stores information about where the decorator was used
+    Reflect.defineMetadata('current_user_param_index', index, target, key);
+  },
+}));
 
 describe('AddressesController', () => {
   let controller: AddressesController;
@@ -13,6 +21,17 @@ describe('AddressesController', () => {
     getUserDefaultAddress: jest.fn(),
     updateAddress: jest.fn(),
     changeUserDefaultAddress: jest.fn(),
+  };
+
+  const mockUser: UserInfoResponse = {
+    sub: '1234567890',
+    uid: 'user123',
+    email_verified: true,
+    name: 'John Doe',
+    preferred_username: 'john@example.com',
+    given_name: 'John',
+    family_name: 'Doe',
+    email: 'john@example.com',
   };
 
   beforeEach(async () => {
@@ -55,7 +74,7 @@ describe('AddressesController', () => {
     it('should call AddressesService.addNewAddress with correct data', async () => {
       mockAddressesService.addNewAddress.mockResolvedValue(mockResponse);
 
-      const result = await controller.addNewAddress(addressData);
+      const result = await controller.addNewAddress(addressData, mockUser);
 
       expect(mockAddressesService.addNewAddress).toHaveBeenCalledWith(
         addressData,
@@ -88,7 +107,7 @@ describe('AddressesController', () => {
     it('should call AddressesService.getUserAddresses with correct userId', async () => {
       mockAddressesService.getUserAddresses.mockResolvedValue(mockAddresses);
 
-      const result = await controller.getUserAddresses(userId);
+      const result = await controller.getUserAddresses(mockUser);
 
       expect(mockAddressesService.getUserAddresses).toHaveBeenCalledWith(
         userId,
@@ -120,11 +139,11 @@ describe('AddressesController', () => {
     it('should call AddressesService.getAddressById with correct userId and addressId', async () => {
       mockAddressesService.getAddressById.mockResolvedValue(mockAddressDetail);
 
-      const result = await controller.getAddressDetail(userId, addressId);
+      const result = await controller.getAddressDetail(mockUser, addressId);
 
       expect(mockAddressesService.getAddressById).toHaveBeenCalledWith(
-        userId,
         addressId,
+        userId,
       );
       expect(result).toEqual({
         status: 'success',
@@ -169,7 +188,7 @@ describe('AddressesController', () => {
         mockDefaultAddress,
       );
 
-      const result = await controller.getUserDefaultAddress(userId);
+      const result = await controller.getUserDefaultAddress(mockUser);
 
       expect(mockAddressesService.getUserDefaultAddress).toHaveBeenCalledWith(
         userId,
@@ -202,7 +221,7 @@ describe('AddressesController', () => {
         .mockResolvedValue(mockResponse);
 
       const result = await controller.updateAddress(
-        userId,
+        mockUser,
         addressId,
         updateData,
       );
@@ -223,7 +242,7 @@ describe('AddressesController', () => {
       const invalidUpdateData = {};
 
       const result = await controller.updateAddress(
-        userId,
+        mockUser,
         addressId,
         invalidUpdateData,
       );
@@ -247,7 +266,7 @@ describe('AddressesController', () => {
         .mockResolvedValue(mockResponse);
 
       const result = await controller.setDefaultAddress(
-        userId,
+        mockUser,
         addressId,
         updateData,
       );
@@ -266,7 +285,7 @@ describe('AddressesController', () => {
       const invalidUpdateData = {};
 
       const result = await controller.setDefaultAddress(
-        userId,
+        mockUser,
         addressId,
         invalidUpdateData,
       );
