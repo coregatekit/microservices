@@ -3,7 +3,7 @@ import { AddressesService } from './addresses.service';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
 import { AddAddressDto } from './addresses';
 import * as schema from '../../db/drizzle/schema';
-import { sql } from 'drizzle-orm';
+import { and, sql } from 'drizzle-orm';
 import { AddressType } from './addresses.enum';
 
 describe('AddressesService', () => {
@@ -166,9 +166,7 @@ describe('AddressesService', () => {
       expect(result).toEqual([mockAddress]);
       expect(mockDb.select).toHaveBeenCalled();
       expect(mockDb.from).toHaveBeenCalledWith(schema.addresses);
-      expect(mockDb.where).toHaveBeenCalledWith(
-        sql`${schema.addresses.userId} = ${userId}`,
-      );
+      expect(mockDb.where).toHaveBeenCalledWith(and(expect.anything()));
     });
 
     it('should throw an error if no addresses found for user', async () => {

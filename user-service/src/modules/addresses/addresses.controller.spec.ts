@@ -106,12 +106,14 @@ describe('AddressesController', () => {
     ];
 
     it('should call AddressesService.getUserAddresses with correct userId', async () => {
+      const type = '';
       mockAddressesService.getUserAddresses.mockResolvedValue(mockAddresses);
 
-      const result = await controller.getUserAddresses(mockUser);
+      const result = await controller.getUserAddresses(type, mockUser);
 
       expect(mockAddressesService.getUserAddresses).toHaveBeenCalledWith(
         userId,
+        '',
       );
       expect(result).toEqual({
         status: 'success',
