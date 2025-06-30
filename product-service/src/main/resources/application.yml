@@ -3,15 +3,38 @@ spring:
     name: Product API
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/product_service
-    username: antman
-    password: zRSuuR1Pz9VdJB
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:product_service}
+    username: ${DB_USERNAME:antman}
+    password: ${DB_PASSWORD:zRSuuR1Pz9VdJB}
     driver-class-name: org.postgresql.Driver
+
+    hikari:
+      pool-name: ProductServiceHikariConnectionPool
+      connection-timeout: 20000
+      minimum-idle: 10
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      auto-commit: false
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
 
 server:
   port: 9001
+
+logging:
+  level:
+    org.springframework.jdbc: ${MODE:DEBUG}
+    org.hibernate.SQL: ${MODE:DEBUG}
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
