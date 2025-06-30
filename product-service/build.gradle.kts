@@ -1,10 +1,10 @@
 plugins {
 	java
-	id("org.springframework.boot") version "3.5.1-SNAPSHOT"
+	id("org.springframework.boot") version "3.5.4-SNAPSHOT"
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
-group = "dev.coregate"
+group = "dev.coregate.product"
 version = "0.0.1-SNAPSHOT"
 
 java {
@@ -25,17 +25,17 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-actuator")
-	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-	implementation("org.springframework.boot:spring-boot-starter-data-rest")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	// https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
-	compileOnly("org.projectlombok:lombok")
-	runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	compileOnly("org.projectlombok:lombok")
+	developmentOnly("org.springframework.boot:spring-boot-devtools")
+	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+	runtimeOnly("org.postgresql:postgresql")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 tasks.withType<Test> {

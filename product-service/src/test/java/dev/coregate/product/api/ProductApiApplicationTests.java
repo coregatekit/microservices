@@ -1,10 +1,10 @@
-package dev.coregate.product_service;
+package dev.coregate.product.api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ProductServiceApplicationTests {
+class ProductApiApplicationTests {
 
 	@Test
 	void contextLoads() {
