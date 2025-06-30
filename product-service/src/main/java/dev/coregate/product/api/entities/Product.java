@@ -1,5 +1,6 @@
 package dev.coregate.product.api.entities;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -38,13 +39,13 @@ public class Product {
   private String description;
 
   @Column(name = "price", nullable = false)
-  private Double price;
+  private BigDecimal price;
 
   @Column(name = "sku", nullable = false, unique = true, length = 50)
   private String sku;
 
   @Column(name = "weight_kg", nullable = false)
-  private Double weightKg;
+  private BigDecimal weightKg;
 
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
@@ -71,7 +72,7 @@ public class Product {
   public Product() {
   }
 
-  public Product(Category category, String name, String description, Double price, String sku, Double weightKg) {
+  public Product(Category category, String name, String description, BigDecimal price, String sku, BigDecimal weightKg) {
     this.category = category;
     this.name = name;
     this.description = description;
