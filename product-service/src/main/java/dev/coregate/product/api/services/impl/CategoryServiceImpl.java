@@ -25,8 +25,18 @@ public class CategoryServiceImpl implements CategoryService {
     this.categoryRepository = categoryRepository;
   }
 
+  /**
+   * Creates a new category.
+   * This method checks if a category with the same name already exists.
+   * If it does, an IllegalArgumentException is thrown.
+   * If not, it creates a new category and saves it to the repository.
+   * @param request The request containing the category details.
+   * @return The created category response.
+   * @throws IllegalArgumentException if a category with the same name already exists.
+   */
   public CategoryResponse createCategory(CreateCategoryRequest request) {
     Optional<Category> existingCategory = categoryRepository.findByName(request.getName());
+
     if (existingCategory.isPresent()) {
       throw new IllegalArgumentException("Category with name '" + request.getName() + "' already exists.");
     }
