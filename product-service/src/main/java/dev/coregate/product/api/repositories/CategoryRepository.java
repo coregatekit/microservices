@@ -1,5 +1,6 @@
 package dev.coregate.product.api.repositories;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,5 +12,5 @@ import dev.coregate.product.api.entities.Category;
 public interface CategoryRepository extends JpaRepository<Category, UUID> {
     // Custom query methods can be defined here if needed
     // For example, find by name or other attributes
-    Category findByName(String name);
+    Optional<Category> findByName(String name);
 }
