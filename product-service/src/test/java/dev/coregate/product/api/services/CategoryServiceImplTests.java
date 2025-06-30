@@ -90,4 +90,18 @@ public class CategoryServiceImplTests {
     verify(categoryRepository).save(category);
     verify(mapper).toResponse(savedCategory);
   }
+
+  @Test
+  void should_throw_exception_when_category_already_exists() {
+    // Given
+    when(categoryRepository.findByName(anyString())).thenReturn(Optional.of(savedCategory));
+
+    // When & Then
+    try {
+      categoryService.createCategory(createRequest);
+    } catch (IllegalArgumentException e) {
+      assertThat(e.getMessage()).isEqualTo("Category with name 'Electronics' already exists.");
+    }
+    verify(categoryRepository).findByName("Electronics");
+  }
 }
