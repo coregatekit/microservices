@@ -32,6 +32,7 @@ public class CategoryMapperImpl implements CategoryMapper {
    * @param request the request containing the category details
    * @return a Category entity with the name and description set
    */
+  @Override
   public Category toEntity (CreateCategoryRequest request) {
     Category category = new Category();
     category.setName(request.getName());
@@ -48,6 +49,7 @@ public class CategoryMapperImpl implements CategoryMapper {
    * @param category the category entity to convert
    * @return a CategoryResponse with the mapped fields
    */
+  @Override
   public CategoryResponse toResponse(Category category) {
     CategoryResponse response = new CategoryResponse();
     response.setId(category.getId());
