@@ -4,6 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+/**
+ * Request DTO for creating a new category.
+ * This class is used to encapsulate the data required to create a new category.
+ * It includes validation annotations to ensure that the name and description
+ * fields meet specific criteria.
+ */
+
 @Data
 public class CreateCategoryRequest {
   @NotBlank(message = "Name is required")

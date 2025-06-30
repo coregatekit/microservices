@@ -5,6 +5,12 @@ import java.util.UUID;
 
 import lombok.Data;
 
+/**
+ * Response DTO for category details.
+ * This class is used to encapsulate the data returned when a category is retrieved.
+ * It includes fields for the category ID, name, description, and timestamps for creation and last update.
+ */
+
 @Data
 public class CategoryResponse {
   private UUID id;

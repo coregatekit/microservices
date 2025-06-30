@@ -10,6 +10,16 @@ import org.springframework.context.annotation.Primary;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+/**
+ * Configuration class for setting up the database connection using HikariCP.
+ * This class reads database properties from the application configuration
+ * and sets up a connection pool for efficient database access.
+ * It configures the JDBC URL, username, password, and various connection pool
+ * settings
+ * such as maximum pool size, idle timeout, and connection timeout.
+ * The connection pool is named "ProductServiceHikariConnectionPool".
+ */
+
 @Configuration
 public class DatabaseConfig {
 
