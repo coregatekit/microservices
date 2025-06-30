@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import dev.coregate.product.api.dto.requests.CreateCategoryRequest;
 import dev.coregate.product.api.dto.responses.CategoryResponse;
 import dev.coregate.product.api.entities.Category;
-import dev.coregate.product.api.mapper.CategoryMapper;
+import dev.coregate.product.api.mapper.impl.CategoryMapperImpl;
 import dev.coregate.product.api.repositories.CategoryRepository;
 import dev.coregate.product.api.services.impl.CategoryServiceImpl;
 
@@ -31,7 +31,7 @@ public class CategoryServiceImplTests {
   private CategoryRepository categoryRepository;
 
   @Mock
-  private CategoryMapper mapper;
+  private CategoryMapperImpl mapper;
 
   @InjectMocks
   private CategoryServiceImpl categoryService;
@@ -72,9 +72,9 @@ public class CategoryServiceImplTests {
   void should_create_category_successfully() {
     // Given
     when(categoryRepository.findByName(anyString())).thenReturn(Optional.empty());
-    when(mapper.fromCreateToEntity(any(CreateCategoryRequest.class))).thenReturn(category);
+    when(mapper.toEntity(any(CreateCategoryRequest.class))).thenReturn(category);
     when(categoryRepository.save(any(Category.class))).thenReturn(savedCategory);
-    when(mapper.fromEntityToResponse(any(Category.class))).thenReturn(categoryResponse);
+    when(mapper.toResponse(any(Category.class))).thenReturn(categoryResponse);
 
     // When
     CategoryResponse response = categoryService.createCategory(createRequest);
@@ -86,8 +86,8 @@ public class CategoryServiceImplTests {
 
     // Verify interactions
     verify(categoryRepository).findByName("Electronics");
-    verify(mapper).fromCreateToEntity(createRequest);
+    verify(mapper).toEntity(createRequest);
     verify(categoryRepository).save(category);
-    verify(mapper).fromEntityToResponse(savedCategory);
+    verify(mapper).toResponse(savedCategory);
   }
 }
