@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import dev.coregate.product.api.dto.requests.CreateCategoryRequest;
 import dev.coregate.product.api.dto.responses.CategoryResponse;
 import dev.coregate.product.api.entities.Category;
-import dev.coregate.product.api.mapper.CategoryMapper;
+import dev.coregate.product.api.mapper.impl.CategoryMapperImpl;
 import dev.coregate.product.api.repositories.CategoryRepository;
 import dev.coregate.product.api.services.CategoryService;
 import jakarta.transaction.Transactional;
@@ -16,11 +16,11 @@ import jakarta.transaction.Transactional;
 @Service
 @Transactional
 public class CategoryServiceImpl implements CategoryService {
-  private final CategoryMapper mapper;
+  private final CategoryMapperImpl mapper;
   private final CategoryRepository categoryRepository;
 
   @Autowired
-  public CategoryServiceImpl(CategoryMapper mapper, CategoryRepository categoryRepository) {
+  public CategoryServiceImpl(CategoryMapperImpl mapper, CategoryRepository categoryRepository) {
     this.mapper = mapper;
     this.categoryRepository = categoryRepository;
   }
@@ -41,9 +41,9 @@ public class CategoryServiceImpl implements CategoryService {
       throw new IllegalArgumentException("Category with name '" + request.getName() + "' already exists.");
     }
 
-    Category category = mapper.fromCreateToEntity(request);
+    Category category = mapper.toEntity(request);
     Category savedCategory = categoryRepository.save(category);
 
-    return mapper.fromEntityToResponse(savedCategory);
+    return mapper.toResponse(savedCategory);
   }
 }
