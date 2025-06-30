@@ -1,10 +1,13 @@
 package dev.coregate.product.api.services.impl;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import dev.coregate.product.api.dto.requests.CreateCategoryRequest;
 import dev.coregate.product.api.dto.responses.CategoryResponse;
+import dev.coregate.product.api.entities.Category;
 import dev.coregate.product.api.mapper.CategoryMapper;
 import dev.coregate.product.api.repositories.CategoryRepository;
 import dev.coregate.product.api.services.CategoryService;
@@ -23,6 +26,14 @@ public class CategoryServiceImpl implements CategoryService {
   }
 
   public CategoryResponse createCategory(CreateCategoryRequest request) {
-    throw new UnsupportedOperationException("Unimplemented method 'createCategory'");
+    Optional<Category> existingCategory = categoryRepository.findByName(request.getName());
+    if (existingCategory.isPresent()) {
+      throw new IllegalArgumentException("Category with name '" + request.getName() + "' already exists.");
+    }
+
+    Category category = mapper.fromCreateToEntity(request);
+    Category savedCategory = categoryRepository.save(category);
+
+    return mapper.fromEntityToResponse(savedCategory);
   }
 }

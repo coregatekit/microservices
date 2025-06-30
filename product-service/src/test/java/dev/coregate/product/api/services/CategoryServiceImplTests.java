@@ -1,9 +1,17 @@
 package dev.coregate.product.api.services;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -32,7 +40,7 @@ public class CategoryServiceImplTests {
   private Category category;
   private Category savedCategory;
   private CategoryResponse categoryResponse;
-  
+
   @BeforeEach
   void setUp() {
     createRequest = new CreateCategoryRequest();
@@ -58,5 +66,28 @@ public class CategoryServiceImplTests {
     categoryResponse.setDescription("Devices and gadgets");
     categoryResponse.setCreatedAt(savedCategory.getCreatedAt());
     categoryResponse.setUpdatedAt(savedCategory.getUpdatedAt());
+  }
+
+  @Test
+  void should_create_category_successfully() {
+    // Given
+    when(categoryRepository.findByName(anyString())).thenReturn(Optional.empty());
+    when(mapper.fromCreateToEntity(any(CreateCategoryRequest.class))).thenReturn(category);
+    when(categoryRepository.save(any(Category.class))).thenReturn(savedCategory);
+    when(mapper.fromEntityToResponse(any(Category.class))).thenReturn(categoryResponse);
+
+    // When
+    CategoryResponse response = categoryService.createCategory(createRequest);
+
+    assertThat(response).isNotNull();
+    assertThat(response.getId()).isEqualTo(savedCategory.getId());
+    assertThat(response.getName()).isEqualTo("Electronics");
+    assertThat(response.getDescription()).isEqualTo("Devices and gadgets");
+
+    // Verify interactions
+    verify(categoryRepository).findByName("Electronics");
+    verify(mapper).fromCreateToEntity(createRequest);
+    verify(categoryRepository).save(category);
+    verify(mapper).fromEntityToResponse(savedCategory);
   }
 }
