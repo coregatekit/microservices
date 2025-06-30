@@ -1,6 +1,17 @@
 spring:
   application:
     name: Product API
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/product_service
+    username: antman
+    password: zRSuuR1Pz9VdJB
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
 
 server:
   port: 9001
