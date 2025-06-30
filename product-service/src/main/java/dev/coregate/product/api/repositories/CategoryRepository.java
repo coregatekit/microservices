@@ -1,10 +1,11 @@
 package dev.coregate.product.api.repositories;
 
 import java.util.UUID;
-import java.util.Locale.Category;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import dev.coregate.product.api.entities.Category;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, UUID> {
