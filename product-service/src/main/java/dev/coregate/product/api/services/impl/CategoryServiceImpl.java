@@ -1,5 +1,6 @@
 package dev.coregate.product.api.services.impl;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,5 +46,15 @@ public class CategoryServiceImpl implements CategoryService {
     Category savedCategory = categoryRepository.save(category);
 
     return mapper.toResponse(savedCategory);
+  }
+
+  /**
+   * Retrieves all categories.
+   * This method is currently unimplemented and will throw an UnsupportedOperationException if called.
+   * @return A list of all category responses.
+   */
+  public List<CategoryResponse> getAllCategories() {
+    List<Category> categories = categoryRepository.findAll();
+    return categories.stream().map(mapper::toResponse).toList();
   }
 }

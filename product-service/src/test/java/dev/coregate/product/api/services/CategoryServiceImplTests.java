@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -103,5 +104,26 @@ public class CategoryServiceImplTests {
       assertThat(e.getMessage()).isEqualTo("Category with name 'Electronics' already exists.");
     }
     verify(categoryRepository).findByName("Electronics");
+  }
+
+  @Test
+  void should_return_list_of_categories() {
+    // Given
+    when(categoryRepository.findAll()).thenReturn(List.of(savedCategory));
+    when(mapper.toResponse(any(Category.class))).thenReturn(categoryResponse);
+    
+    // When
+    List<CategoryResponse> responses = categoryService.getAllCategories();
+    
+    // Then
+    assertThat(responses).isNotEmpty();
+    assertThat(responses.size()).isEqualTo(1);
+    assertThat(responses.get(0).getId()).isEqualTo(savedCategory.getId());
+    assertThat(responses.get(0).getName()).isEqualTo("Electronics");
+    assertThat(responses.get(0).getDescription()).isEqualTo("Devices and gadgets");
+    
+    // Verify interactions
+    verify(categoryRepository).findAll();
+    verify(mapper).toResponse(savedCategory);
   }
 }
