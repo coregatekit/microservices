@@ -111,19 +111,32 @@ public class CategoryServiceImplTests {
     // Given
     when(categoryRepository.findAll()).thenReturn(List.of(savedCategory));
     when(mapper.toResponse(any(Category.class))).thenReturn(categoryResponse);
-    
+
     // When
     List<CategoryResponse> responses = categoryService.getAllCategories();
-    
+
     // Then
     assertThat(responses).isNotEmpty();
     assertThat(responses.size()).isEqualTo(1);
     assertThat(responses.get(0).getId()).isEqualTo(savedCategory.getId());
     assertThat(responses.get(0).getName()).isEqualTo("Electronics");
     assertThat(responses.get(0).getDescription()).isEqualTo("Devices and gadgets");
-    
+
     // Verify interactions
     verify(categoryRepository).findAll();
     verify(mapper).toResponse(savedCategory);
+  }
+
+  @Test
+  void should_delete_category_successfully() {
+    // Given
+    UUID categoryId = UUID.randomUUID();
+    when(categoryRepository.existsById(categoryId)).thenReturn(true);
+
+    // When
+    categoryService.deleteCategory(categoryId);
+
+    // Then
+    verify(categoryRepository).deleteById(categoryId);
   }
 }

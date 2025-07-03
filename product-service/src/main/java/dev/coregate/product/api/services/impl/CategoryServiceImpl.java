@@ -2,6 +2,7 @@ package dev.coregate.product.api.services.impl;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,5 +57,14 @@ public class CategoryServiceImpl implements CategoryService {
   public List<CategoryResponse> getAllCategories() {
     List<Category> categories = categoryRepository.findAll();
     return categories.stream().map(mapper::toResponse).toList();
+  }
+
+  @Override
+  public void deleteCategory(UUID id) {
+    if (!categoryRepository.existsById(id)) {
+      throw new IllegalArgumentException("Category with ID '" + id + "' does not exist.");
+    }
+
+    categoryRepository.deleteById(id);
   }
 }
