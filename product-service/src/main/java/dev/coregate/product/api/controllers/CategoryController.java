@@ -1,5 +1,7 @@
 package dev.coregate.product.api.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,5 +31,11 @@ public class CategoryController {
   public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
     CategoryResponse response = categoryService.createCategory(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  }
+
+  @GetMapping
+  public ResponseEntity<List<CategoryResponse>> getAllCategories() {
+    List<CategoryResponse> responses = categoryService.getAllCategories();
+    return ResponseEntity.ok(responses);
   }
 }
