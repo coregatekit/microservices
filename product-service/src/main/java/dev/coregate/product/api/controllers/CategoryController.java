@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.coregate.product.api.dto.requests.CreateCategoryRequest;
+import dev.coregate.product.api.dto.responses.ApiResponse;
 import dev.coregate.product.api.dto.responses.CategoryResponse;
 import dev.coregate.product.api.services.CategoryService;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,14 +29,16 @@ public class CategoryController {
   }
 
   @PostMapping
-  public ResponseEntity<CategoryResponse> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
+  public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
     CategoryResponse response = categoryService.createCategory(request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    ApiResponse<CategoryResponse> apiResponse = ApiResponse.success("Category created successfully", response);
+    return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
   }
 
   @GetMapping
-  public ResponseEntity<List<CategoryResponse>> getAllCategories() {
+  public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
     List<CategoryResponse> responses = categoryService.getAllCategories();
-    return ResponseEntity.ok(responses);
+    ApiResponse<List<CategoryResponse>> apiResponse = ApiResponse.success("Categories retrieved successfully", responses);
+    return ResponseEntity.ok(apiResponse);
   }
 }
