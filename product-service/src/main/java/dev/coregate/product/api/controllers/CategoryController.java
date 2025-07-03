@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +30,7 @@ public class CategoryController {
   }
 
   @PostMapping
+  @PreAuthorize("hasRole('MANAGER')")
   public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
     CategoryResponse response = categoryService.createCategory(request);
     ApiResponse<CategoryResponse> apiResponse = ApiResponse.success("Category created successfully", response);
@@ -36,6 +38,7 @@ public class CategoryController {
   }
 
   @GetMapping
+  @PreAuthorize("hasRole('MANAGER')")
   public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
     List<CategoryResponse> responses = categoryService.getAllCategories();
     ApiResponse<List<CategoryResponse>> apiResponse = ApiResponse.success("Categories retrieved successfully", responses);
