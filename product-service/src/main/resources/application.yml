@@ -29,6 +29,13 @@ spring:
           batch_size: 20
         order_inserts: true
         order_updates: true
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/ecm_management_dev
+          jwk-set-uri: http://localhost:8080/realms/ecm_management_dev/protocol/openid-connect/certs
 
 server:
   port: 9001
