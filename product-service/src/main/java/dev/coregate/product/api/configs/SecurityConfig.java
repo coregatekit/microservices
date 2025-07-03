@@ -14,6 +14,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
+import dev.coregate.product.api.enums.Role;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -23,7 +25,7 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.disable())
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(authorize -> authorize.requestMatchers("/api/v1/categories").hasRole("MANAGER")
+        .authorizeHttpRequests(authorize -> authorize.requestMatchers("/api/v1/categories").hasRole(Role.MANAGER.getRoleName())
             .anyRequest().authenticated())
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));

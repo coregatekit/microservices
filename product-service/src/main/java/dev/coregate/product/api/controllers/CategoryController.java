@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.coregate.product.api.constants.SecurityConstants;
 import dev.coregate.product.api.dto.requests.CreateCategoryRequest;
 import dev.coregate.product.api.dto.responses.ApiResponse;
 import dev.coregate.product.api.dto.responses.CategoryResponse;
@@ -33,7 +34,7 @@ public class CategoryController {
   }
 
   @PostMapping
-  @PreAuthorize("hasRole('MANAGER')")
+  @PreAuthorize(SecurityConstants.HAS_MANAGER_ROLE)
   public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
     CategoryResponse response = categoryService.createCategory(request);
     ApiResponse<CategoryResponse> apiResponse = ApiResponse.success("Category created successfully", response);
@@ -41,7 +42,7 @@ public class CategoryController {
   }
 
   @GetMapping
-  @PreAuthorize("hasRole('MANAGER')")
+  @PreAuthorize(SecurityConstants.HAS_MANAGER_ROLE)
   public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
     List<CategoryResponse> responses = categoryService.getAllCategories();
     ApiResponse<List<CategoryResponse>> apiResponse = ApiResponse.success("Categories retrieved successfully", responses);
@@ -49,7 +50,7 @@ public class CategoryController {
   }
 
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('MANAGER')")
+  @PreAuthorize(SecurityConstants.HAS_MANAGER_ROLE)
   public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable("id") UUID id) {
     categoryService.deleteCategory(id);
     ApiResponse<Void> apiResponse = ApiResponse.success("Category deleted successfully");
