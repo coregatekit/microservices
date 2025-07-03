@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import dev.coregate.product.api.dto.requests.CreateCategoryRequest;
 import dev.coregate.product.api.dto.responses.CategoryResponse;
 import dev.coregate.product.api.entities.Category;
+import dev.coregate.product.api.exceptions.ResourceNotFoundException;
 import dev.coregate.product.api.mapper.impl.CategoryMapperImpl;
 import dev.coregate.product.api.repositories.CategoryRepository;
 import dev.coregate.product.api.services.CategoryService;
@@ -62,7 +63,7 @@ public class CategoryServiceImpl implements CategoryService {
   @Override
   public void deleteCategory(UUID id) {
     if (!categoryRepository.existsById(id)) {
-      throw new IllegalArgumentException("Category with ID '" + id + "' does not exist.");
+      throw new ResourceNotFoundException("Category with ID '" + id + "' does not exist.");
     }
 
     categoryRepository.deleteById(id);
