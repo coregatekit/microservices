@@ -1,5 +1,7 @@
 package dev.coregate.product.api.dto.responses;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.Data;
 
 /**
@@ -9,6 +11,7 @@ import lombok.Data;
  * @param <T> The type of data being returned
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
     private String status;
     private String message;
