@@ -6,12 +6,9 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -28,9 +25,8 @@ public class Product {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "category_id", nullable = false)
-  private Category category;
+  @Column(name = "category_id", nullable = false)
+  private UUID categoryId;
 
   @Column(name = "name", nullable = false, length = 255)
   private String name;
@@ -53,10 +49,6 @@ public class Product {
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
-  public UUID getCategoryId() {
-    return category != null ? category.getId() : null;
-  }
-
   @PrePersist
   protected void onCreate() {
     LocalDateTime now = LocalDateTime.now();
@@ -72,8 +64,8 @@ public class Product {
   public Product() {
   }
 
-  public Product(Category category, String name, String description, BigDecimal price, String sku, BigDecimal weightKg) {
-    this.category = category;
+  public Product(UUID categoryId, String name, String description, BigDecimal price, String sku, BigDecimal weightKg) {
+    this.categoryId = categoryId;
     this.name = name;
     this.description = description;
     this.price = price;
