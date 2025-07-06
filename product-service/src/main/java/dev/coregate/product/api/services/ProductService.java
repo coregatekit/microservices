@@ -1,8 +1,8 @@
 package dev.coregate.product.api.services;
 
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
-import dev.coregate.product.api.dto.responses.ProductRespons;
+import dev.coregate.product.api.dto.responses.ProductResponse;
 
 public interface ProductService {  
-  public ProductRespons createProduct(CreateProductRequest request);
+  public ProductResponse createProduct(CreateProductRequest request);
 }
