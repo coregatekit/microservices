@@ -1,6 +1,7 @@
 package dev.coregate.product.api.dto.requests;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -32,13 +33,13 @@ public class CreateProductRequest {
   private BigDecimal weightKg;
 
   @NotBlank(message = "Category ID is required")
-  private String categoryId;
+  private UUID categoryId;
 
   public CreateProductRequest() {
   }
 
   public CreateProductRequest(String name, String description, String sku, BigDecimal price, BigDecimal weightKg,
-      String categoryId) {
+      UUID categoryId) {
     this.name = name;
     this.description = description;
     this.sku = sku;
