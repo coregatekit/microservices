@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import lombok.Data;
 
 /**
@@ -15,30 +17,36 @@ import lombok.Data;
  */
 
 @Data
-public class ProductRespons {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ProductResponse {
   private UUID id;
-  private UUID categoryId;
   private String name;
   private String description;
   private BigDecimal price;
   private String sku;
   private BigDecimal weightKg;
+  private UUID categoryId;
+  private CategoryResponse category; // Optional, if category details are needed
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
-  public ProductRespons() {
+  public ProductResponse() {
+    // Default constructor
   }
 
-  public ProductRespons(UUID id, UUID categoryId, String name, String description, BigDecimal price, String sku,
-      BigDecimal weightKg, LocalDateTime createdAt, LocalDateTime updatedAt) {
+  public ProductResponse(UUID id, String name, String description, BigDecimal price, String sku,
+      BigDecimal weightKg, UUID categoryId, CategoryResponse category, LocalDateTime createdAt,
+      LocalDateTime updatedAt) {
     this.id = id;
-    this.categoryId = categoryId;
     this.name = name;
     this.description = description;
     this.price = price;
     this.sku = sku;
     this.weightKg = weightKg;
+    this.categoryId = categoryId;
+    this.category = category;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }
+
 }

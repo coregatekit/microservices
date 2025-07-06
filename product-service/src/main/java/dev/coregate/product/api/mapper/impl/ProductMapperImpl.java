@@ -3,6 +3,7 @@ package dev.coregate.product.api.mapper.impl;
 import org.springframework.stereotype.Component;
 
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
+import dev.coregate.product.api.dto.responses.ProductResponse;
 import dev.coregate.product.api.entities.Product;
 import dev.coregate.product.api.mapper.ProductMapper;
 
@@ -19,6 +20,12 @@ public class ProductMapperImpl implements ProductMapper {
     product.setWeightKg(request.getWeightKg());
     product.setCategoryId(request.getCategoryId());
     return product;
+  }
+
+  @Override
+  public ProductResponse toResponse(Product product) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'toResponse'");
   }
 
 }
