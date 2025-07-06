@@ -24,8 +24,17 @@ public class ProductMapperImpl implements ProductMapper {
 
   @Override
   public ProductResponse toResponse(Product product) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'toResponse'");
+    ProductResponse response = new ProductResponse();
+    response.setId(product.getId());
+    response.setName(product.getName());
+    response.setDescription(product.getDescription());
+    response.setPrice(product.getPrice());
+    response.setSku(product.getSku());
+    response.setWeightKg(product.getWeightKg());
+    response.setCategoryId(product.getCategoryId());
+    response.setCreatedAt(product.getCreatedAt());
+    response.setUpdatedAt(product.getUpdatedAt());
+    return response;
   }
 
 }

@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
+import dev.coregate.product.api.dto.responses.ProductResponse;
 import dev.coregate.product.api.entities.Product;
 import dev.coregate.product.api.mapper.impl.ProductMapperImpl;
 
@@ -54,5 +55,34 @@ public class ProductMapperTests {
     // Timestamps should be null since they're set by JPA lifecycle callbacks
     assertThat(product.getCreatedAt()).isNull();
     assertThat(product.getUpdatedAt()).isNull();
+  }
+
+  @Test
+  void should_map_product_to_product_response() {
+    // Given
+    UUID categoryId = UUID.randomUUID();
+    Product product = new Product();
+    product.setId(UUID.randomUUID());
+    product.setName("Test Product");
+    product.setDescription("This is a test product.");
+    product.setPrice(new BigDecimal(19.99));
+    product.setSku("TEST-SKU-123");
+    product.setWeightKg(new BigDecimal(1.5));
+    product.setCategoryId(categoryId);
+    product.setCreatedAt(null); // Simulating JPA lifecycle
+    product.setUpdatedAt(null); // Simulating JPA lifecycle
+
+    // When
+    ProductResponse response = productMapper.toResponse(product);
+
+    // Then
+    assertThat(response).isNotNull();
+    assertThat(response.getId()).isEqualTo(product.getId());
+    assertThat(response.getName()).isEqualTo("Test Product");
+    assertThat(response.getDescription()).isEqualTo("This is a test product.");
+    assertThat(response.getPrice()).isEqualTo(new BigDecimal(19.99));
+    assertThat(response.getSku()).isEqualTo("TEST-SKU-123");
+    assertThat(response.getWeightKg()).isEqualTo(new BigDecimal(1.5));
+    assertThat(response.getCategoryId()).isEqualTo(categoryId);
   }
 }
