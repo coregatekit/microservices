@@ -10,15 +10,6 @@ import org.springframework.context.annotation.Primary;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-/**
- * Class นี้ใช้สำหรับ Config Database Connection
- * โดยใช้ HikariCP เป็น Connection Pool 
- * โดยที่จะอ่านค่าจาก application.yml
- * ที่กำหนดไว้ใน properties เช่น URL, Username, Password
- * และตั้งค่าต่างๆ เช่น ขนาดของ Connection Pool, Timeout, Auto-commit
- * และ Performance Settings  
- */
-
 @Configuration
 public class DatabaseConfig {
 

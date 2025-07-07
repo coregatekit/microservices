@@ -14,44 +14,66 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-import dev.coregate.product.api.enums.Role;
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
+  /**
+   * Configures API security settings including CSRF, session management
+   * abd JWT-based authentication using OAuth2 Resource Server.
+   * 
+   * @param http the HttpSecurity to configure
+   * @return configured SecurityFilterChain
+   * @throws Exception if configuration fails
+   * @see SecurityFilterChain
+   */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.disable())
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(authorize -> authorize.requestMatchers("/api/v1/categories").hasRole(Role.MANAGER.getRoleName())
-            .anyRequest().authenticated())
+        .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
     return http.build();
   }
 
+  /**
+   * Converts JWT Claims to Granted Authorities.
+   * This method extracts roles from the JWT's realm_access claim
+   * and maps them to SimpleGrantedAuthority with "ROLE_" prefix.
+   * 
+   * @return JwtAuthenticationConverter configured to convert JWT claims
+   *        to Granted Authorities.
+   * @see JwtAuthenticationConverter
+   */
   @Bean
   public JwtAuthenticationConverter jwtAuthenticationConverter() {
     JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
     converter.setJwtGrantedAuthoritiesConverter(jwt -> {
       Object realmAccessObj = jwt.getClaims().get("realm_access");
+      
+      // Handle missing or invalid realm_access claim
       if (!(realmAccessObj instanceof Map)) {
         return java.util.Collections.emptyList();
       }
+
       @SuppressWarnings("unchecked")
       Map<String, Object> realmAccess = (Map<String, Object>) realmAccessObj;
+
       Object rolesObj = realmAccess.get("roles");
       if (!(rolesObj instanceof Collection)) {
         return java.util.Collections.emptyList();
       }
+
+      // Convert roles to Granted Authorities with "ROLE_" prefix
       @SuppressWarnings("unchecked")
       Collection<String> roles = (Collection<String>) rolesObj;
       return roles.stream()
           .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())).collect(Collectors.toList());
     });
+
     return converter;
   }
 }
