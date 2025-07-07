@@ -3,6 +3,7 @@ package dev.coregate.product.api.services;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import dev.coregate.product.api.dto.requests.CreateCategoryRequest;
 import dev.coregate.product.api.dto.responses.CategoryResponse;
 import dev.coregate.product.api.entities.Category;
+import dev.coregate.product.api.exceptions.ResourceNotFoundException;
 import dev.coregate.product.api.mapper.impl.CategoryMapperImpl;
 import dev.coregate.product.api.repositories.CategoryRepository;
 import dev.coregate.product.api.services.impl.CategoryServiceImpl;
@@ -138,5 +140,21 @@ public class CategoryServiceImplTests {
 
     // Then
     verify(categoryRepository).deleteById(categoryId);
+  }
+
+  @Test
+  void should_throw_exception_when_deleting_non_existent_category() {
+    // Given
+    UUID categoryId = UUID.randomUUID();
+    when(categoryRepository.existsById(categoryId)).thenReturn(false);
+
+    // When & Then
+    try {
+      categoryService.deleteCategory(categoryId);
+    } catch (ResourceNotFoundException e) {
+      assertThat(e.getMessage()).isEqualTo("Category with ID '" + categoryId + "' does not exist.");
+    }
+    verify(categoryRepository).existsById(categoryId);
+    verify(categoryRepository, never()).deleteById(categoryId);
   }
 }
