@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -26,13 +28,15 @@ public class CreateProductRequest {
   @Size(max = 50, message = "SKU must be at most 50 characters long")
   private String sku;
 
-  @NotBlank(message = "Price is required")
+  @NotNull(message = "Price is required")
+  @Positive(message = "Price must be greater than 0")
   private BigDecimal price;
 
-  @NotBlank(message = "Weight is required")
+  @NotNull(message = "Weight is required")
+  @Positive(message = "Weight must be greater than 0")
   private BigDecimal weightKg;
 
-  @NotBlank(message = "Category ID is required")
+  @NotNull(message = "Category ID is required")
   private UUID categoryId;
 
   public CreateProductRequest() {
