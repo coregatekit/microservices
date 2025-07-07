@@ -3,7 +3,6 @@ package dev.coregate.product.api.controllers;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,7 +27,6 @@ public class CategoryController {
 
   private final CategoryService categoryService;
   
-  @Autowired
   public CategoryController(CategoryService categoryService) {
     this.categoryService = categoryService;
   }
