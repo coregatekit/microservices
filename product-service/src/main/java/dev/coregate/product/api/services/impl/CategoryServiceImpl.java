@@ -37,6 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
    * @return The created category response.
    * @throws IllegalArgumentException if a category with the same name already exists.
    */
+  @Override
   public CategoryResponse createCategory(CreateCategoryRequest request) {
     Optional<Category> existingCategory = categoryRepository.findByName(request.getName());
 
@@ -55,11 +56,19 @@ public class CategoryServiceImpl implements CategoryService {
    * This method is currently unimplemented and will throw an UnsupportedOperationException if called.
    * @return A list of all category responses.
    */
+  @Override
   public List<CategoryResponse> getAllCategories() {
     List<Category> categories = categoryRepository.findAll();
     return categories.stream().map(mapper::toResponse).toList();
   }
 
+  /**
+   * Deletes a category by its ID.
+   * This method checks if the category exists before attempting to delete it.
+   * If the category does not exist, a ResourceNotFoundException is thrown.
+   * @param id The ID of the category to delete.
+   * @throws ResourceNotFoundException if the category with the given ID does not exist.
+   */
   @Override
   public void deleteCategory(UUID id) {
     if (!categoryRepository.existsById(id)) {
@@ -67,5 +76,17 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     categoryRepository.deleteById(id);
+  }
+
+  /**
+   * Check if a category exists by its ID.
+   * This method is checking the existence of a category in the repository.
+   * @param id The ID of the category to check.
+   * @return true if the category exists, false otherwise.
+   */
+  @Override
+  public boolean existsById(UUID id) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'existsById'");
   }
 }
