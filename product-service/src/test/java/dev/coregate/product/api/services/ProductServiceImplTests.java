@@ -18,7 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
 import dev.coregate.product.api.dto.responses.ProductResponse;
 import dev.coregate.product.api.entities.Product;
+import dev.coregate.product.api.exceptions.ResourceNotFoundException;
 import dev.coregate.product.api.mapper.ProductMapper;
+import dev.coregate.product.api.repositories.CategoryRepository;
 import dev.coregate.product.api.repositories.ProductRepository;
 import dev.coregate.product.api.services.impl.ProductServiceImpl;
 
@@ -27,6 +29,8 @@ public class ProductServiceImplTests {
 
   @Mock
   private ProductRepository productRepository;
+  @Mock
+  private CategoryRepository categoryRepository; // Assuming this is needed for validation
 
   @Mock
   private ProductMapper productMapper;
@@ -88,6 +92,7 @@ public class ProductServiceImplTests {
   @Test
   void should_create_product_successfully() {
     // Arrange
+    when(categoryRepository.existsById(any(UUID.class))).thenReturn(true);
     when(productMapper.toEntity(any())).thenReturn(product);
     when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
     when(productMapper.toResponse(any(Product.class))).thenReturn(productResponse);
@@ -99,5 +104,19 @@ public class ProductServiceImplTests {
     assertThat(response).isNotNull();
     assertThat(response.getId()).isNotNull();
     assertThat(response.getId()).isEqualTo(savedProduct.getId());
+  }
+
+  @Test
+  void should_throw_resource_not_found_exception_when_category_does_not_exist() {
+    // Arrange
+    when(categoryRepository.existsById(any(UUID.class))).thenReturn(false);
+
+    // Act & Assert
+    try {
+      productService.createProduct(createRequest);
+    } catch (Exception e) {
+      assertThat(e).isInstanceOf(ResourceNotFoundException.class);
+      assertThat(e.getMessage()).contains("Category");
+    }
   }
 }
