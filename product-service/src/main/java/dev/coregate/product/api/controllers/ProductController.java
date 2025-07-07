@@ -25,6 +25,16 @@ public class ProductController {
     this.productService = productService;
   }
 
+  /**
+   * Creates a new product.
+   * This endpoint allows users with the "MANAGER" role to create a new product.
+   * It accepts a CreateProductRequest object containing the product details.
+   * @param request the request object containing product details
+   * @see CreateProductRequest
+   * @return ResponseEntity containing ApiResponse with ProductResponse
+   * @see ApiResponse
+   * @see ProductResponse
+   */
   @PostMapping
   @PreAuthorize(SecurityConstants.HAS_MANAGER_ROLE)
   public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@Valid @RequestBody CreateProductRequest request) {
