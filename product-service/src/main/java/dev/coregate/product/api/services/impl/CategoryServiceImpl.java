@@ -77,16 +77,4 @@ public class CategoryServiceImpl implements CategoryService {
 
     categoryRepository.deleteById(id);
   }
-
-  /**
-   * Check if a category exists by its ID.
-   * This method is checking the existence of a category in the repository.
-   * @param id The ID of the category to check.
-   * @return true if the category exists, false otherwise.
-   */
-  @Override
-  public boolean existsById(UUID id) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'existsById'");
-  }
 }

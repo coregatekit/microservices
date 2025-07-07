@@ -10,5 +10,4 @@ public interface CategoryService {
   public CategoryResponse createCategory(CreateCategoryRequest request);  
   public List<CategoryResponse> getAllCategories();
   public void deleteCategory(UUID id);
-  public boolean existsById(UUID id);
 }
