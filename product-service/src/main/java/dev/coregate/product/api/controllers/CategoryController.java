@@ -31,6 +31,17 @@ public class CategoryController {
     this.categoryService = categoryService;
   }
 
+  /**
+   * Creates a new category.
+   * This endpoint allows users with the "MANAGER" role to create a new category.
+   * It accepts a CreateCategoryRequest object containing the category details.
+   * 
+   * @param request the request object containing category details
+   * @see CreateCategoryRequest
+   * @return ResponseEntity containing ApiResponse with CategoryResponse
+   * @see ApiResponse
+   * @see CategoryResponse
+   */
   @PostMapping
   @PreAuthorize(SecurityConstants.HAS_MANAGER_ROLE)
   public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody CreateCategoryRequest request) {
@@ -39,6 +50,14 @@ public class CategoryController {
     return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
   }
 
+  /**
+   * Retrieves all categories.
+   * This endpoint allows users with the "MANAGER" role to retrieve a list of all categories.
+   * 
+   * @return ResponseEntity containing ApiResponse with a list of CategoryResponse
+   * @see ApiResponse
+   * @see CategoryResponse
+   */
   @GetMapping
   @PreAuthorize(SecurityConstants.HAS_MANAGER_ROLE)
   public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
@@ -47,6 +66,14 @@ public class CategoryController {
     return ResponseEntity.ok(apiResponse);
   }
 
+  /**
+   * Deletes a category by its ID.
+   * This endpoint allows users with the "MANAGER" role to delete a category.
+   * 
+   * @param id the UUID of the category to be deleted
+   * @return ResponseEntity containing ApiResponse with a success message
+   * @see ApiResponse
+   */
   @DeleteMapping("/{id}")
   @PreAuthorize(SecurityConstants.HAS_MANAGER_ROLE)
   public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable("id") UUID id) {
