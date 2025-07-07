@@ -11,13 +11,12 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * Configuration class for setting up the database connection using HikariCP.
- * This class reads database properties from the application configuration
- * and sets up a connection pool for efficient database access.
- * It configures the JDBC URL, username, password, and various connection pool
- * settings
- * such as maximum pool size, idle timeout, and connection timeout.
- * The connection pool is named "ProductServiceHikariConnectionPool".
+ * Class นี้ใช้สำหรับ Config Database Connection
+ * โดยใช้ HikariCP เป็น Connection Pool 
+ * โดยที่จะอ่านค่าจาก application.yml
+ * ที่กำหนดไว้ใน properties เช่น URL, Username, Password
+ * และตั้งค่าต่างๆ เช่น ขนาดของ Connection Pool, Timeout, Auto-commit
+ * และ Performance Settings  
  */
 
 @Configuration
