@@ -10,6 +10,8 @@ import { JwtModule } from './modules/jwt/jwt.module';
 import { AuthMiddleware } from './modules/auth/auth.middleware';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './modules/auth/auth.guard';
+import { TestingModule } from './modules/testing/testing.module';
+import { Environment } from './utils/environment';
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import { AuthGuard } from './modules/auth/auth.guard';
     AddressesModule,
     KeycloakModule,
     JwtModule,
+    ...(Environment.isDevelopment() ? [TestingModule] : []),
   ],
   controllers: [],
   providers: [
