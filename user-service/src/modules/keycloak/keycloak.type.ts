@@ -47,3 +47,22 @@ export type UserInfoResponse = {
   family_name: string;
   email: string;
 };
+
+export type KeycloakUser = {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  emailVerified: boolean;
+  attributes: Record<string, string[]>;
+  createdTimestamp: number;
+  enabled: boolean;
+  totp: boolean;
+  disableableCredentialTypes: string[];
+  requiredActions: string[];
+  notBefore: number;
+  access: {
+    manage: boolean;
+  };
+};

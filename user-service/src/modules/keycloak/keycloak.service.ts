@@ -6,11 +6,13 @@ import {
   AccessTokenResponse,
   CreateKeycloakUserRequest,
   KeycloakLoginResponse,
+  KeycloakUser,
   LoginResponse,
   LogoutResponse,
   UserInfoResponse,
 } from './keycloak.type';
 import { CreateKeycloakUser, LoginRequest, LogoutRequest } from './keycloak';
+import { Environment } from 'src/utils/environment';
 
 @Injectable()
 export class KeycloakService {
@@ -223,5 +225,59 @@ export class KeycloakService {
         message: 'Logout failed due to an error',
       };
     }
+  }
+
+  async clearUserData(username: string): Promise<void> {
+    if (Environment.isProduction()) {
+      this.logger.warn(
+        'Attempted to clear user data in production environment. Operation aborted.',
+      );
+      throw new Error('Cannot clear user data in production environment');
+    }
+
+    this.logger.log(`Clearing user data for user: ${username}`);
+    const accessToken = await this.getAccessToken();
+
+    this.logger.log(`Fetching userId for user: ${username}`);
+    const userInfoUrl = `${this.BASE_URL}/admin/realms/${this.KEYCLOAK_REALM}/users?username=${username}`;
+    const userResponse = await firstValueFrom(
+      this.httpService
+        .get<KeycloakUser[]>(userInfoUrl, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .pipe(
+          catchError((error) => {
+            this.logger.error(`Error fetching user info: ${error}`);
+            throw new Error('Failed to fetch user info');
+          }),
+        ),
+    );
+    const userId = userResponse.data[0]?.id;
+
+    this.logger.log(`Deleting user with ID: ${userId}`);
+    const deleteUserUrl = `${this.BASE_URL}/admin/realms/${this.KEYCLOAK_REALM}/users/${userId}`;
+    const deleteResponse = await firstValueFrom(
+      this.httpService
+        .delete(deleteUserUrl, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        .pipe(
+          catchError((error) => {
+            this.logger.error(`Error deleting user: ${error}`);
+            throw new Error('Failed to delete user');
+          }),
+        ),
+    );
+
+    if (deleteResponse.status !== 204) {
+      this.logger.error(`Failed to delete user: ${deleteResponse.statusText}`);
+      throw new Error('Failed to delete user');
+    }
+
+    this.logger.log(`User ${username} cleared successfully`);
   }
 }
