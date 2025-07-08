@@ -9,7 +9,7 @@ export class TestingController {
   @Public()
   @Delete('clear-user-data')
   @HttpCode(HttpStatus.OK)
-  async clearUserData(@Body() user: { id: string }) {
-    return this.keycloakService.clearUserData(user.id);
+  async clearUserData(@Body() user: { username: string }) {
+    return this.keycloakService.clearUserData(user.username);
   }
 }
