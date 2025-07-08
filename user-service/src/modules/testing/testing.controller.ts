@@ -1,32 +1,15 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { Environment } from '../../utils/environment';
+import { Body, Controller, Delete, HttpCode, HttpStatus } from '@nestjs/common';
+import { KeycloakService } from '../keycloak/keycloak.service';
+import { Public } from '../auth/auth.decorator';
 
-@ApiTags('Testing (Development Only)')
 @Controller('testing')
 export class TestingController {
-  @Get()
-  @ApiOperation({ summary: 'Get testing information' })
-  @ApiResponse({ status: 200, description: 'Returns testing information' })
-  getTestingInfo() {
-    return {
-      message: 'Testing endpoint is available - Development mode',
-      timestamp: new Date().toISOString(),
-      environment: Environment.current(),
-      isDevelopment: Environment.isDevelopment(),
-    };
-  }
+  constructor(private readonly keycloakService: KeycloakService) {}
 
-  @Get('health')
-  @ApiOperation({ summary: 'Get testing health status' })
-  @ApiResponse({ status: 200, description: 'Returns testing health status' })
-  getTestingHealth() {
-    return {
-      status: 'ok',
-      service: 'user-service',
-      testing: true,
-      environment: Environment.current(),
-      uptime: process.uptime(),
-    };
+  @Public()
+  @Delete('clear-user-data')
+  @HttpCode(HttpStatus.OK)
+  async clearUserData(@Body() user: { id: string }) {
+    return this.keycloakService.clearUserData(user.id);
   }
 }
