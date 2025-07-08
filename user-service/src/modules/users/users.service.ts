@@ -1,5 +1,11 @@
 import * as schema from '../../db/drizzle/schema';
-import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './users';
 import { UserResponse } from './users.interface';
 import { DrizzleAsyncProvider } from '../../db/db.provider';
@@ -135,19 +141,35 @@ export class UsersService {
   }
 
   async clearUserData(username: string): Promise<void> {
-    if (Environment.isProduction()) {
-      this.logger.warn(
-        'Attempted to clear user data in production environment. Operation aborted.',
+    try {
+      if (Environment.isProduction()) {
+        this.logger.warn(
+          'Attempted to clear user data in production environment. Operation aborted.',
+        );
+        throw new Error('Cannot clear user data in production environment');
+      }
+
+      this.logger.log(`Clearing user data for username: ${username}`);
+      const result = await this.db
+        .delete(schema.users)
+        .where(sql`${schema.users.email} = ${username}`);
+
+      if (result.rowCount === 0) {
+        this.logger.warn(`No user found with username: ${username}`);
+        throw new NotFoundException(`User with username ${username} not found`);
+      }
+
+      await this.keycloakService.clearUserData(username);
+      this.logger.log(`User data cleared for username: ${username}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to clear user data for username: ${username}`,
+        error,
       );
-      throw new Error('Cannot clear user data in production environment');
+      throw new Error(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `Failed to clear user data for username: ${username}. Error: ${error.message}`,
+      );
     }
-
-    this.logger.log(`Clearing user data for username: ${username}`);
-    await this.db
-      .delete(schema.users)
-      .where(sql`${schema.users.email} = ${username}`);
-
-    await this.keycloakService.clearUserData(username);
-    this.logger.log(`User data cleared for username: ${username}`);
   }
 }
