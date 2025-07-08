@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TestingController } from './testing.controller';
-import { KeycloakModule } from '../keycloak/keycloak.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [KeycloakModule],
+  imports: [UsersModule],
   controllers: [TestingController],
 })
 export class TestingModule {}

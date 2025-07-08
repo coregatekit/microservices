@@ -8,5 +8,6 @@ import { KeycloakModule } from '../keycloak/keycloak.module';
   imports: [DbModule, KeycloakModule],
   controllers: [UsersController],
   providers: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}
