@@ -7,6 +7,7 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { sql } from 'drizzle-orm';
 import { DataMasker } from '../../common/data-mask';
 import { KeycloakService } from '../keycloak/keycloak.service';
+import { Environment } from '../../utils/environment';
 
 @Injectable()
 export class UsersService {
@@ -131,5 +132,22 @@ export class UsersService {
       createdAt: new Date(result[0].createdAt),
       updatedAt: new Date(result[0].updatedAt),
     };
+  }
+
+  async clearUserData(username: string): Promise<void> {
+    if (Environment.isProduction()) {
+      this.logger.warn(
+        'Attempted to clear user data in production environment. Operation aborted.',
+      );
+      throw new Error('Cannot clear user data in production environment');
+    }
+
+    this.logger.log(`Clearing user data for username: ${username}`);
+    await this.db
+      .delete(schema.users)
+      .where(sql`${schema.users.email} = ${username}`);
+
+    await this.keycloakService.clearUserData(username);
+    this.logger.log(`User data cleared for username: ${username}`);
   }
 }

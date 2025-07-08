@@ -12,7 +12,7 @@ import {
   UserInfoResponse,
 } from './keycloak.type';
 import { CreateKeycloakUser, LoginRequest, LogoutRequest } from './keycloak';
-import { Environment } from 'src/utils/environment';
+import { Environment } from '../../utils/environment';
 
 @Injectable()
 export class KeycloakService {
