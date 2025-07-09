@@ -32,4 +32,15 @@ test.describe('Authentication', () => {
     expect(data!.accessToken).toBeDefined();
     expect(data!.refreshToken).toBeDefined();
   });
+
+  test('should login failed when user is invalid', async ({ request }) => {
+    const body: LoginRequest = {
+      email: 'unknowntester@coregate.dev',
+      password: 'sup3rS3cret',
+    };
+
+    const response = await context.post('/api/v1/auth/login', { data: body });
+
+    expect(response.status()).toEqual(401);
+  });
 });

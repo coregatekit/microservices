@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { catchError, firstValueFrom } from 'rxjs';
 import {
@@ -13,6 +13,7 @@ import {
 } from './keycloak.type';
 import { CreateKeycloakUser, LoginRequest, LogoutRequest } from './keycloak';
 import { Environment } from '../../utils/environment';
+import { AxiosError } from 'axios';
 
 @Injectable()
 export class KeycloakService {
@@ -59,6 +60,19 @@ export class KeycloakService {
     const { data } = await firstValueFrom(
       this.httpService.post<KeycloakLoginResponse>(url, params).pipe(
         catchError((error) => {
+          if (error instanceof AxiosError) {
+            const errorResponse = error.response?.data as {
+              error: string;
+              error_description: string;
+            };
+            this.logger.error(
+              `Axios error logging in to Keycloak: ${errorResponse.error_description}`,
+            );
+            if (errorResponse.error === 'invalid_grant') {
+              throw new UnauthorizedException('Invalid username or password');
+            }
+          }
+
           this.logger.error(`Error logging in to Keycloak: ${error}`);
           throw new Error('Failed to login to Keycloak');
         }),
