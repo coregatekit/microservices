@@ -3,6 +3,7 @@ import { ApiResponse } from '../../../interfaces/response';
 import {
   LoginRequest,
   LoginResponse,
+  LogoutRequest,
 } from '../../../interfaces/user-service/auth';
 
 test.describe('Authentication', () => {
@@ -42,5 +43,39 @@ test.describe('Authentication', () => {
     const response = await context.post('/api/v1/auth/login', { data: body });
 
     expect(response.status()).toEqual(401);
+  });
+
+  test('should logout successfully', async () => {
+    const loginReqest: LoginRequest = {
+      email: 'authtester@coregate.dev',
+      password: 'sup3rS3cret',
+    };
+    const loginResponse = await context.post('/api/v1/auth/login', {
+      data: loginReqest,
+    });
+    const loginResponseBody: ApiResponse<LoginResponse> =
+      await loginResponse.json();
+
+    if (!loginResponseBody.data) {
+      console.error(loginResponseBody);
+      throw new Error('Login failed, no data returned');
+    }
+
+    const body: LogoutRequest = {
+      refreshToken: loginResponseBody.data.refreshToken,
+    };
+
+    const response = await context.post('/api/v1/auth/logout', {
+      headers: {
+        Authorization: `Bearer ${loginResponseBody.data.accessToken}`,
+      },
+      data: body,
+    });
+
+    const responseBody: ApiResponse<unknown> = await response.json();
+
+    expect(response.status()).toEqual(200);
+    expect(responseBody.status).toEqual('success');
+    expect(responseBody.message).toEqual('Logout successful');
   });
 });
