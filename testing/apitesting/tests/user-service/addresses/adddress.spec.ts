@@ -196,3 +196,55 @@ test.describe('Get address details', () => {
     expect(responseBody.data!.addressLine1.includes('69')).toBeTruthy(); // 69 is part of the address line in database
   });
 });
+
+test.describe('Get default addresses', () => {
+  let context: APIRequestContext;
+  let accessToken: string;
+  const addressRoute = '/api/v1/addresses/default';
+
+  test.beforeAll(async () => {
+    context = await request.newContext({
+      baseURL: 'http://localhost:9000',
+    });
+
+    const loginResponse = await context.post('/api/v1/auth/login', {
+      data: {
+        email: 'addresstester@coregate.dev',
+        password: 'sup3rS3cret',
+      },
+    });
+
+    const loginResponseBody: ApiResponse<LoginResponse> =
+      await loginResponse.json();
+    if (!loginResponseBody.data) {
+      console.error(
+        'Login failed, no access token received',
+        loginResponseBody,
+      );
+      throw new Error('Login failed, no access token received');
+    }
+
+    accessToken = loginResponseBody.data?.accessToken;
+  });
+
+  test('should retrieve default addresses successfully', async () => {
+    const response = await context.get(addressRoute, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const responseBody: ApiResponse<AddressResponse[]> = await response.json();
+
+    expect(response.status()).toEqual(200);
+    expect(responseBody.status).toEqual('success');
+    expect(responseBody.data).toBeDefined();
+    expect(Array.isArray(responseBody.data)).toBeTruthy();
+    responseBody.data?.forEach((address) => {
+      expect(address.isDefault).toBeTruthy();
+    });
+    expect(responseBody.data!.length).toBe(2);
+    expect(responseBody.data?.some((address) => address.type === 'BILLING')).toBeTruthy();
+    expect(responseBody.data?.some((address) => address.type === 'SHIPPING')).toBeTruthy();
+  });
+});
