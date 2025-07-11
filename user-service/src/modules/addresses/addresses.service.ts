@@ -12,6 +12,7 @@ import { AddAddressDto, transformAddressResponse } from './addresses';
 import { AddAddressResponse, AddressResponse } from './addresses.interface';
 import { eq, and, sql } from 'drizzle-orm';
 import { AddressType } from './addresses.enum';
+import { Environment } from '../../utils/environment';
 
 @Injectable()
 export class AddressesService {
@@ -287,5 +288,34 @@ export class AddressesService {
       `Default address changed successfully for user ID: ${userId}, address ID: ${addressId}`,
     );
     return { id: updatedAddressId[0].id };
+  }
+
+  async clearAllUserAddresses(username: string): Promise<void> {
+    if (Environment.isProduction()) {
+      this.logger.warn(
+        `Attempt to clear all user addresses in production environment by user: ${username}`,
+      );
+      throw new BadRequestException(
+        'Cannot clear all user addresses in production environment',
+      );
+    }
+
+    this.logger.log(`Clearing all addresses for user: ${username}`);
+    const user = await this.db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.email, username),
+    });
+
+    if (!user) {
+      this.logger.warn(`User with email ${username} does not exist`);
+      throw new NotFoundException(`User with email ${username} does not exist`);
+    }
+
+    this.logger.log(`Deleting all addresses for user ID: ${user.id}`);
+    const result = await this.db
+      .delete(schema.addresses)
+      .where(eq(schema.addresses.userId, user.id));
+    this.logger.log(
+      `Deleted ${result.rowCount} addresses for user ID: ${user.id}`,
+    );
   }
 }

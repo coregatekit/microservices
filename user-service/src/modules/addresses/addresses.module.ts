@@ -7,5 +7,6 @@ import { DbModule } from '../../db/db.module';
   imports: [DbModule],
   controllers: [AddressesController],
   providers: [AddressesService],
+  exports: [AddressesService],
 })
 export class AddressesModule {}
