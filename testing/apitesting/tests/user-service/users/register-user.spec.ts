@@ -4,7 +4,7 @@ import { ApiResponse } from '../../../interfaces/response';
 
 test.describe('Register User', () => {
   let context: APIRequestContext;
-  const username = 'tester@coregate.dev';
+  const username = 'registertester@coregate.dev';
 
   test.beforeAll(async () => {
     context = await request.newContext({
@@ -17,8 +17,8 @@ test.describe('Register User', () => {
     const body = {
       email: username,
       password: 'Test1234',
-      firstName: 'Test',
-      lastName: 'User',
+      firstName: 'Register',
+      lastName: 'Tester',
       phone: '123123299',
     };
 
@@ -34,8 +34,8 @@ test.describe('Register User', () => {
     expect(data).toBeDefined();
     expect(data!.id).toBeDefined();
     expect(data!.email).toEqual(username);
-    expect(data!.firstName).toEqual('Test');
-    expect(data!.lastName).toEqual('User');
+    expect(data!.firstName).toEqual('Register');
+    expect(data!.lastName).toEqual('Tester');
     expect(data!.phone).toEqual('123123299');
     expect(data!.createdAt).toBeDefined();
     expect(data!.updatedAt).toBeDefined();
