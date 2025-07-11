@@ -16,6 +16,7 @@ public interface CategoryService {
    * @param request The request containing the category details.
    * @return The created category response.
    * @throws IllegalArgumentException if a category with the same name already exists.
+   * @see CategoryResponse
    */
   public CategoryResponse createCategory(CreateCategoryRequest request);  
 
@@ -23,6 +24,7 @@ public interface CategoryService {
    * Retrieves all categories.
    * This method fetches all categories from the repository and returns them as a list of CategoryResponse objects.
    * @return A list of all category responses.
+   * @see CategoryResponse
    */
   public List<CategoryResponse> getAllCategories();
 
@@ -32,6 +34,7 @@ public interface CategoryService {
    * It is used to remove a category from the system.
    * @param id The UUID of the category to be deleted.
    * @throws ResourceNotFoundException if the category with the given ID does not exist.
+   * @return void
    */
   public void deleteCategory(UUID id);
 }
