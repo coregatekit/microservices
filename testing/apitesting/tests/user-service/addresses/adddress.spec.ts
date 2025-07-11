@@ -129,3 +129,70 @@ test.describe('Get all addresses', () => {
     expect(response.status()).toEqual(401);
   });
 });
+
+test.describe('Get address details', () => {
+  let context: APIRequestContext;
+  let accessToken: string;
+  const addressRoute = '/api/v1/addresses';
+  const billingAddressId = 'e969975f-b4a7-43d5-9809-555ecccd3771';
+  const shippingAddressId = '9550e74c-252a-4d20-bbb8-0e0662cc2cd1';
+
+  test.beforeAll(async () => {
+    context = await request.newContext({
+      baseURL: 'http://localhost:9000',
+    });
+
+    const loginResponse = await context.post('/api/v1/auth/login', {
+      data: {
+        email: 'addresstester@coregate.dev',
+        password: 'sup3rS3cret',
+      },
+    });
+
+    const loginResponseBody: ApiResponse<LoginResponse> =
+      await loginResponse.json();
+    if (!loginResponseBody.data) {
+      console.error(
+        'Login failed, no access token received',
+        loginResponseBody,
+      );
+      throw new Error('Login failed, no access token received');
+    }
+
+    accessToken = loginResponseBody.data?.accessToken;
+  });
+
+  test('should retrieve billing address details successfully', async () => {
+    const response = await context.get(`${addressRoute}/${billingAddressId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const responseBody: ApiResponse<AddressResponse> = await response.json();
+
+    expect(response.status()).toEqual(200);
+    expect(responseBody.status).toEqual('success');
+    expect(responseBody.data).toBeDefined();
+    expect(responseBody.data!.id).toEqual(billingAddressId);
+    expect(responseBody.data!.type).toEqual('BILLING');
+    expect(responseBody.data!.addressLine1.includes('56')).toBeTruthy(); // 56 is part of the address line in database
+  });
+
+  test('should retrieve shipping address details successfully', async () => {
+    const response = await context.get(`${addressRoute}/${shippingAddressId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const responseBody: ApiResponse<AddressResponse> = await response.json();
+
+    expect(response.status()).toEqual(200);
+    expect(responseBody.status).toEqual('success');
+    expect(responseBody.data).toBeDefined();
+    expect(responseBody.data!.id).toEqual(shippingAddressId);
+    expect(responseBody.data!.type).toEqual('SHIPPING');
+    expect(responseBody.data!.addressLine1.includes('69')).toBeTruthy(); // 69 is part of the address line in database
+  });
+});
