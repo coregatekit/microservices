@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional;
 @Service
 @Transactional
 public class CategoryServiceImpl implements CategoryService {
+
   private final CategoryMapperImpl mapper;
   private final CategoryRepository categoryRepository;
 
@@ -28,15 +29,6 @@ public class CategoryServiceImpl implements CategoryService {
     this.categoryRepository = categoryRepository;
   }
 
-  /**
-   * Creates a new category.
-   * This method checks if a category with the same name already exists.
-   * If it does, an IllegalArgumentException is thrown.
-   * If not, it creates a new category and saves it to the repository.
-   * @param request The request containing the category details.
-   * @return The created category response.
-   * @throws IllegalArgumentException if a category with the same name already exists.
-   */
   @Override
   public CategoryResponse createCategory(CreateCategoryRequest request) {
     Optional<Category> existingCategory = categoryRepository.findByName(request.getName());
@@ -51,24 +43,12 @@ public class CategoryServiceImpl implements CategoryService {
     return mapper.toResponse(savedCategory);
   }
 
-  /**
-   * Retrieves all categories.
-   * This method is currently unimplemented and will throw an UnsupportedOperationException if called.
-   * @return A list of all category responses.
-   */
   @Override
   public List<CategoryResponse> getAllCategories() {
     List<Category> categories = categoryRepository.findAll();
     return categories.stream().map(mapper::toResponse).toList();
   }
 
-  /**
-   * Deletes a category by its ID.
-   * This method checks if the category exists before attempting to delete it.
-   * If the category does not exist, a ResourceNotFoundException is thrown.
-   * @param id The ID of the category to delete.
-   * @throws ResourceNotFoundException if the category with the given ID does not exist.
-   */
   @Override
   public void deleteCategory(UUID id) {
     if (!categoryRepository.existsById(id)) {
