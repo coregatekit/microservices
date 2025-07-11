@@ -10,10 +10,6 @@ test.describe('Register User', () => {
     context = await request.newContext({
       baseURL: 'http://localhost:9000',
     });
-
-    await context.delete('/api/v1/testing/clear-user-data', {
-      data: { username: username },
-    });
   });
 
   test('should register a new user successfully', async () => {
