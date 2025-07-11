@@ -66,4 +66,11 @@ test.describe('Add new address', () => {
 
     expect(response.status()).toEqual(401);
   });
+
+  test.afterAll(async () => {
+    await context.delete('/api/v1/testing/clear-all-user-addresses', {
+      data: { username: 'authtester@coregate.dev' },
+    });
+    await context.dispose();
+  });
 });
