@@ -1,7 +1,10 @@
 import test, { APIRequestContext, expect, request } from '@playwright/test';
 import { ApiResponse } from '../../../interfaces/response';
 import { LoginResponse } from '../../../interfaces/user-service/auth';
-import { AddAddressRequest } from '../../../interfaces/user-service/address';
+import {
+  AddAddressRequest,
+  AddressResponse,
+} from '../../../interfaces/user-service/address';
 
 test.describe('Add new address', () => {
   let context: APIRequestContext;
@@ -72,5 +75,57 @@ test.describe('Add new address', () => {
       data: { username: 'authtester@coregate.dev' },
     });
     await context.dispose();
+  });
+});
+
+test.describe('Get all addresses', () => {
+  let context: APIRequestContext;
+  let accessToken: string;
+  const addressRoute = '/api/v1/addresses';
+
+  test.beforeAll(async () => {
+    context = await request.newContext({
+      baseURL: 'http://localhost:9000',
+    });
+
+    const loginResponse = await context.post('/api/v1/auth/login', {
+      data: {
+        email: 'addresstester@coregate.dev',
+        password: 'sup3rS3cret',
+      },
+    });
+
+    const loginResponseBody: ApiResponse<LoginResponse> =
+      await loginResponse.json();
+    if (!loginResponseBody.data) {
+      console.error(
+        'Login failed, no access token received',
+        loginResponseBody,
+      );
+      throw new Error('Login failed, no access token received');
+    }
+
+    accessToken = loginResponseBody.data?.accessToken;
+  });
+
+  test('should retrieve all addresses successfully', async () => {
+    const response = await context.get(addressRoute, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const responseBody: ApiResponse<AddressResponse[]> = await response.json();
+
+    expect(response.status()).toEqual(200);
+    expect(responseBody.status).toEqual('success');
+    expect(responseBody.data).toBeDefined();
+    expect(Array.isArray(responseBody.data)).toBeTruthy();
+  });
+
+  test('should fail to retrieve addresses without authentication', async () => {
+    const response = await context.get(addressRoute);
+
+    expect(response.status()).toEqual(401);
   });
 });
