@@ -1,5 +1,7 @@
 package dev.coregate.product.api.services.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
@@ -37,5 +39,11 @@ public class ProductServiceImpl implements ProductService {
     Product product = productMapper.toEntity(request);
     Product savedProduct = productRepository.save(product);
     return productMapper.toResponse(savedProduct);
+  }
+
+  @Override
+  public List<ProductResponse> searchProducts(String query, int size) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'searchProducts'");
   }
 }

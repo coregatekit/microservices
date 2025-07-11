@@ -1,5 +1,7 @@
 package dev.coregate.product.api.services;
 
+import java.util.List;
+
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
 import dev.coregate.product.api.dto.responses.ProductResponse;
 
@@ -14,6 +16,16 @@ public interface ProductService {
    * @param request The request containing the product details.
    * @throws ResourceNotFoundException if the category with the given ID does not exist.
    * @return The created product response.
+   * @see ProductResponse
    */
   public ProductResponse createProduct(CreateProductRequest request);
+
+  /**
+   * Searches for products based on a query string.
+   * @param query the search query string to filter products.
+   * @param size the maximum size of the result set to return.
+   * @return a list of ProductResposnse objects that match the search criteria.
+   * @see ProductResponse
+   */
+  public List<ProductResponse> searchProducts(String query, int size);
 }
