@@ -6,6 +6,8 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +18,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
+import dev.coregate.product.api.dto.responses.CursorPageResponse;
 import dev.coregate.product.api.dto.responses.ProductResponse;
 import dev.coregate.product.api.entities.Product;
 import dev.coregate.product.api.exceptions.ResourceNotFoundException;
@@ -122,6 +126,119 @@ public class ProductServiceImplTests {
       } catch (Exception e) {
         assertThat(e).isInstanceOf(ResourceNotFoundException.class);
         assertThat(e.getMessage()).contains("Category");
+      }
+    }
+  }
+
+  @Nested
+  @DisplayName("Search Products Tests")
+  class searchProducts {
+    private List<Product> products;
+    private List<ProductResponse> productResponses;
+
+    @BeforeEach
+    void setUp() {
+      UUID categoryId = UUID.randomUUID();
+      products = new ArrayList<Product>();
+      productResponses = new ArrayList<ProductResponse>();
+      LocalDateTime now = LocalDateTime.now();
+
+      for (int i = 1; i <= 30; i++) {
+        Product product = new Product();
+        product.setId(UUID.randomUUID());
+        if (i % 2 == 0) {
+          product.setName("Product " + i);
+        } else {
+          product.setName("Phone " + i);
+        }
+        product.setDescription("Description for Product " + i);
+        product.setPrice(new BigDecimal(100 + i));
+        product.setSku("SKU-SMP" + i);
+        product.setWeightKg(new BigDecimal(0.1 * i));
+        product.setCategoryId(categoryId);
+        product.setCreatedAt(now.minusMinutes(i));
+        product.setUpdatedAt(now.minusMinutes(i));
+
+        products.add(product);
+
+        ProductResponse productResponse = new ProductResponse();
+        productResponse.setId(product.getId());
+        productResponse.setName(product.getName());
+        productResponse.setDescription(product.getDescription());
+        productResponse.setPrice(product.getPrice());
+        productResponse.setSku(product.getSku());
+        productResponse.setWeightKg(product.getWeightKg());
+        productResponse.setCategoryId(product.getCategoryId());
+        productResponse.setCreatedAt(product.getCreatedAt());
+        productResponse.setUpdatedAt(product.getUpdatedAt());
+
+        productResponses.add(productResponse);
+      }
+    }
+
+    @Test
+    void should_return_products_when_search_query_is_empty() {
+      // Arrange
+      String query = "";
+      String cursor = null;
+      int size = 10;
+
+      when(productRepository.findTopProductsWithSearch(any(String.class), any(PageRequest.class)))
+          .thenReturn(products.subList(0, size + 1));
+
+      for (int i = 0; i < size; i++) {
+        when(productMapper.toResponse(products.get(i)))
+            .thenReturn(productResponses.get(i));
+      }
+
+      // Act
+      CursorPageResponse<ProductResponse> response = productService.searchProducts(query, cursor, size);
+
+      // Assert
+      assertThat(response).isNotNull();
+      assertThat(response.getClass()).isEqualTo(CursorPageResponse.class);
+      assertThat(response.getItems()).isNotEmpty();
+      assertThat(response.getNextCursor()).isNotNull();
+      assertThat(response.isHasMore()).isTrue();
+      assertThat(response.getSize()).isEqualTo(size);
+    }
+
+    @Test
+    void should_return_products_when_search_query_is_not_empty() {
+      // Arrange
+      String query = "Product";
+      String cursor = null;
+      int size = 10;
+
+      List<Product> filteredProducts = products.stream()
+          .filter(p -> p.getName().toLowerCase().contains(query.toLowerCase()))
+          .limit(size + 1)
+          .toList();
+
+      when(productRepository.findTopProductsWithSearch(any(String.class), any(PageRequest.class)))
+          .thenReturn(filteredProducts);
+
+      for (int i = 0; i < Math.min(filteredProducts.size(), size); i++) {
+        Product product = filteredProducts.get(i);
+        ProductResponse productResponse = productResponses.stream()
+            .filter(pr -> pr.getId().equals(product.getId()))
+            .findFirst()
+            .orElse(null);
+
+        when(productMapper.toResponse(product))
+            .thenReturn(productResponse);
+      }
+
+      // Act
+      CursorPageResponse<ProductResponse> response = productService.searchProducts(query, cursor, size);
+
+      // Assert
+      assertThat(response).isNotNull();
+      assertThat(response.getClass()).isEqualTo(CursorPageResponse.class);
+      assertThat(response.getItems()).isNotEmpty();
+
+      for (ProductResponse productResponse : response.getItems()) {
+        assertThat(productResponse.getName()).containsIgnoringCase(query);
       }
     }
   }
