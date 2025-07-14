@@ -2,13 +2,19 @@ package dev.coregate.product.api.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -141,7 +147,7 @@ public class ProductServiceImplTests {
       UUID categoryId = UUID.randomUUID();
       products = new ArrayList<Product>();
       productResponses = new ArrayList<ProductResponse>();
-      LocalDateTime now = LocalDateTime.now();
+      LocalDateTime now = LocalDateTime.of(2025, 7, 1, 12, 0, 0);
 
       for (int i = 1; i <= 30; i++) {
         Product product = new Product();
@@ -251,7 +257,6 @@ public class ProductServiceImplTests {
 
       when(productRepository.findTopProductsWithSearch(any(String.class), any(PageRequest.class)))
           .thenReturn(new ArrayList<>());
-      // when(productMapper.toResponse(any(Product.class))).thenReturn(null);
 
       // Act
       CursorPageResponse<ProductResponse> response = productService.searchProducts(query, cursor, size);
@@ -262,6 +267,153 @@ public class ProductServiceImplTests {
       assertThat(response.getNextCursor()).isNull();
       assertThat(response.isHasMore()).isFalse();
       assertThat(response.getSize()).isEqualTo(0);
+    }
+
+    @Test
+    void should_generate_correct_cursor_from_last_item() {
+      // Arrange
+      String query = "";
+      String cursor = null;
+      int size = 5;
+
+      when(productRepository.findTopProductsWithSearch(any(String.class), any(PageRequest.class)))
+          .thenReturn(products.subList(0, size + 1));
+
+      for (int i = 0; i < size; i++) {
+        when(productMapper.toResponse(products.get(i)))
+            .thenReturn(productResponses.get(i));
+      }
+
+      // Act
+      CursorPageResponse<ProductResponse> response = productService.searchProducts(query, cursor, size);
+
+      // Assert
+      assertThat(response.getItems()).hasSize(size);
+      assertThat(response.getNextCursor()).isNotNull();
+
+      // Check if the cursor is correctly encoded with the last product's createdAt
+      String decodedCursor = new String(Base64.getDecoder().decode(response.getNextCursor()));
+      LocalDateTime expectedCursor = products.get(size - 1).getCreatedAt();
+
+      assertThat(decodedCursor).isEqualTo(expectedCursor.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+    }
+
+    @Test
+    void should_use_cursor_for_next_page_correctly() {
+      // Arrange - First page
+      String query = "";
+      String cursor = null;
+      int size = 5;
+
+      when(productRepository.findTopProductsWithSearch(any(String.class), any(PageRequest.class)))
+          .thenReturn(products.subList(0, size + 1));
+
+      for (int i = 0; i < size; i++) {
+        when(productMapper.toResponse(products.get(i)))
+            .thenReturn(productResponses.get(i));
+      }
+
+      // Act - First page
+      CursorPageResponse<ProductResponse> firstPage = productService.searchProducts(query, cursor, size);
+
+      // Get cursor from first page
+      String nextCursor = firstPage.getNextCursor();
+      assertThat(nextCursor).isNotNull();
+
+      // Arrange - Second page
+      LocalDateTime cursorTime = products.get(size - 1).getCreatedAt();
+
+      when(productRepository.findProductsAfterCursor(any(String.class), eq(cursorTime), any(PageRequest.class)))
+          .thenReturn(products.subList(size, size + size + 1));
+
+      for (int i = size; i < size + size; i++) {
+        when(productMapper.toResponse(products.get(i)))
+            .thenReturn(productResponses.get(i));
+      }
+
+      // Act - Second page
+      CursorPageResponse<ProductResponse> secondPage = productService.searchProducts(query, nextCursor, size);
+
+      // Assert - Second page
+      assertThat(secondPage.getItems()).hasSize(size);
+      assertThat(secondPage.getNextCursor()).isNotNull();
+
+      // Check that the items in the second page are different from the first page
+      Set<UUID> firstPageIds = firstPage.getItems().stream()
+          .map(ProductResponse::getId)
+          .collect(Collectors.toSet());
+
+      Set<UUID> secondPageIds = secondPage.getItems().stream()
+          .map(ProductResponse::getId)
+          .collect(Collectors.toSet());
+
+      assertThat(Collections.disjoint(firstPageIds, secondPageIds)).isTrue();
+    }
+
+    @Test
+    void should_return_null_cursor_when_no_more_items() {
+      // Arrange
+      String query = "";
+      String cursor = null;
+      int size = 30; // This is the maximum size we expect to return
+
+      when(productRepository.findTopProductsWithSearch(any(String.class), any(PageRequest.class)))
+          .thenReturn(products); // Return all products
+
+      for (int i = 0; i < products.size(); i++) {
+        when(productMapper.toResponse(products.get(i)))
+            .thenReturn(productResponses.get(i));
+      }
+
+      // Act
+      CursorPageResponse<ProductResponse> response = productService.searchProducts(query, cursor, size);
+
+      // Assert
+      assertThat(response.getItems()).hasSize(30);
+      assertThat(response.getNextCursor()).isNull(); // Check that there is no next cursor
+      assertThat(response.isHasMore()).isFalse();
+    }
+
+    @Test
+    void should_handle_invalid_cursor_gracefully() {
+      // Arrange
+      String query = "";
+      String invalidCursor = "invalid-cursor-string";
+      int size = 10;
+
+      // Act
+      CursorPageResponse<ProductResponse> response = productService.searchProducts(query, invalidCursor, size);
+
+      // Assert
+      assertThat(response).isNotNull();
+      assertThat(response.getItems()).isEmpty();
+      assertThat(response.getNextCursor()).isNull();
+      assertThat(response.isHasMore()).isFalse();
+      assertThat(response.getSize()).isEqualTo(0);
+    }
+
+    @Test
+    void should_handle_empty_cursor_as_first_page() {
+      // Arrange
+      String query = "";
+      String emptyCursor = "";
+      int size = 10;
+
+      when(productRepository.findTopProductsWithSearch(any(String.class), any(PageRequest.class)))
+          .thenReturn(products.subList(0, size + 1));
+
+      for (int i = 0; i < size; i++) {
+        when(productMapper.toResponse(products.get(i)))
+            .thenReturn(productResponses.get(i));
+      }
+
+      // Act
+      CursorPageResponse<ProductResponse> response = productService.searchProducts(query, emptyCursor, size);
+
+      // Assert
+      assertThat(response.getItems()).hasSize(size);
+      assertThat(response.getNextCursor()).isNotNull();
+      assertThat(response.isHasMore()).isTrue();
     }
   }
 }
