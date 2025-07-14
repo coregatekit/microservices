@@ -42,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public List<ProductResponse> searchProducts(String query, int size) {
+  public List<ProductResponse> searchProducts(String query, String cursor, int size) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'searchProducts'");
   }

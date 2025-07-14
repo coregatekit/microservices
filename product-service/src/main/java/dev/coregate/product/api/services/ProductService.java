@@ -23,9 +23,10 @@ public interface ProductService {
   /**
    * Searches for products based on a query string.
    * @param query the search query string to filter products.
+   * @param cursor the cursor for pagination, used to fetch the next set of results.
    * @param size the maximum size of the result set to return.
    * @return a list of ProductResposnse objects that match the search criteria.
    * @see ProductResponse
    */
-  public List<ProductResponse> searchProducts(String query, int size);
+  public List<ProductResponse> searchProducts(String query, String cursor, int size);
 }
