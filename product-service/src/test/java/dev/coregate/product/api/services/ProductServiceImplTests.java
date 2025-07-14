@@ -241,5 +241,27 @@ public class ProductServiceImplTests {
         assertThat(productResponse.getName()).containsIgnoringCase(query);
       }
     }
+
+    @Test
+    void should_return_empty_response_when_no_products_found() {
+      // Arrange
+      String query = "NonExistentProduct";
+      String cursor = null;
+      int size = 10;
+
+      when(productRepository.findTopProductsWithSearch(any(String.class), any(PageRequest.class)))
+          .thenReturn(new ArrayList<>());
+      // when(productMapper.toResponse(any(Product.class))).thenReturn(null);
+
+      // Act
+      CursorPageResponse<ProductResponse> response = productService.searchProducts(query, cursor, size);
+
+      // Assert
+      assertThat(response).isNotNull();
+      assertThat(response.getItems()).isEmpty();
+      assertThat(response.getNextCursor()).isNull();
+      assertThat(response.isHasMore()).isFalse();
+      assertThat(response.getSize()).isEqualTo(0);
+    }
   }
 }
