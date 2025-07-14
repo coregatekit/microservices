@@ -1,9 +1,11 @@
 package dev.coregate.product.api.configs;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -19,9 +21,13 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+  @Autowired
+  private PublicEndpointCollector publicEndpointCollector;
+
   /**
    * Configures API security settings including CSRF, session management
    * abd JWT-based authentication using OAuth2 Resource Server.
+   * Public endpoints are automatically detected using @PublicEndpoint annotation.
    * 
    * @param http the HttpSecurity to configure
    * @return configured SecurityFilterChain
@@ -30,11 +36,22 @@ public class SecurityConfig {
    */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    // Get public endpoints from annotation scanning
+    List<String> publicEndpoints = publicEndpointCollector.getPublicEndpoints();
+    String[] publicEndpointArray = publicEndpoints.toArray(new String[0]);
+    
     http.csrf(csrf -> csrf.disable())
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
-        .oauth2ResourceServer(
-            oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+        .authorizeHttpRequests(authorize -> authorize
+            .requestMatchers(publicEndpointArray).permitAll() // Allow public access to annotated endpoints
+            .anyRequest().authenticated())
+        .oauth2ResourceServer(oauth2 -> oauth2
+            .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+            .authenticationEntryPoint((request, response, ex) -> {
+              // Allow anonymous access for public endpoints
+              response.setStatus(401);
+            }))
+        .anonymous(anonymous -> anonymous.disable()); // Disable anonymous to use permitAll properly
 
     return http.build();
   }
