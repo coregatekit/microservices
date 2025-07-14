@@ -51,32 +51,32 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
      */
     @Query("SELECT p FROM Product p WHERE " +
             "(:query IS NULL OR :query = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%'))) " +
-            "ORDER By p.id DESC")
+            "ORDER BY p.createdAt DESC, p.id DESC")
     List<Product> findTopProductsWithSearch(@Param("query") String query, Pageable pageable);
 
     /**
-     * Finds products after a specific cursor ID.
-     * This method retrieves products that come after a specified cursor ID.
+     * Finds products after a specific cursor timestamp.
+     * This method retrieves products that were created before a specified cursor timestamp.
      * It supports pagination using the Pageable parameter.
      * 
-     * @param query    the search query string to filter products
-     * @param cursorId the ID of the product to start from
-     * @param pageable the pagination information
-     * @return a list of products that match the search criteria and come after the
-     *         specified cursor ID
+     * @param query         the search query string to filter products
+     * @param cursorCreatedAt the timestamp of the product to start from
+     * @param pageable      the pagination information
+     * @return a list of products that match the search criteria and were created before the cursor
      */
     @Query("SELECT p FROM Product p WHERE " +
-            "p.id < :cursorId AND " +
+            "p.createdAt < :cursorCreatedAt AND " +
             "(:query IS NULL OR :query = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%'))) " +
-            "ORDER BY p.id DESC")
-    List<Product> findProductsAfterCursor(@Param("query") String query, @Param("cursorId") UUID cursorId,
-            Pageable pageable);
+            "ORDER BY p.createdAt DESC, p.id DESC")
+    List<Product> findProductsAfterCursor(@Param("query") String query, 
+                                        @Param("cursorCreatedAt") java.time.LocalDateTime cursorCreatedAt,
+                                        Pageable pageable);
 
     default List<Product> findTopProductsWithSearch(String query, int size) {
         return findTopProductsWithSearch(query, PageRequest.of(0, size));
     }
 
-    default List<Product> findProductsAfterCursor(String query, UUID cursorId, int size) {
-        return findProductsAfterCursor(query, cursorId, PageRequest.of(0, size));
+    default List<Product> findProductsAfterCursor(String query, java.time.LocalDateTime cursorCreatedAt, int size) {
+        return findProductsAfterCursor(query, cursorCreatedAt, PageRequest.of(0, size));
     }
 }
