@@ -1,8 +1,7 @@
 package dev.coregate.product.api.services;
 
-import java.util.List;
-
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
+import dev.coregate.product.api.dto.responses.CursorPageResponse;
 import dev.coregate.product.api.dto.responses.ProductResponse;
 
 public interface ProductService {
@@ -28,5 +27,5 @@ public interface ProductService {
    * @return a list of ProductResposnse objects that match the search criteria.
    * @see ProductResponse
    */
-  public List<ProductResponse> searchProducts(String query, String cursor, int size);
+  public CursorPageResponse<ProductResponse> searchProducts(String query, String cursor, int size);
 }

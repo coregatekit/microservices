@@ -1,10 +1,9 @@
 package dev.coregate.product.api.services.impl;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
+import dev.coregate.product.api.dto.responses.CursorPageResponse;
 import dev.coregate.product.api.dto.responses.ProductResponse;
 import dev.coregate.product.api.entities.Product;
 import dev.coregate.product.api.exceptions.ResourceNotFoundException;
@@ -42,7 +41,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public List<ProductResponse> searchProducts(String query, String cursor, int size) {
+  public CursorPageResponse<ProductResponse> searchProducts(String query, String cursor, int size) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'searchProducts'");
   }
