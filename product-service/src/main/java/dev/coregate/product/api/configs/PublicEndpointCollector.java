@@ -33,17 +33,25 @@ public class PublicEndpointCollector {
             Object controller = applicationContext.getBean(controllerName);
             Class<?> controllerClass = controller.getClass();
             
+            // Get the target class in case of proxies
+            Class<?> targetClass = controllerClass;
+            if (controllerClass.getName().contains("$$")) {
+                // This is likely a CGLIB proxy, get the superclass
+                targetClass = controllerClass.getSuperclass();
+            }
+            
             // Get base path from @RequestMapping on class
             String basePath = "";
-            if (controllerClass.isAnnotationPresent(RequestMapping.class)) {
-                RequestMapping classMapping = controllerClass.getAnnotation(RequestMapping.class);
+            if (targetClass.isAnnotationPresent(RequestMapping.class)) {
+                RequestMapping classMapping = targetClass.getAnnotation(RequestMapping.class);
                 if (classMapping.value().length > 0) {
                     basePath = classMapping.value()[0];
                 }
             }
             
             // Check each method for @PublicEndpoint
-            Method[] methods = controllerClass.getDeclaredMethods();
+            Method[] methods = targetClass.getDeclaredMethods();
+            
             for (Method method : methods) {
                 if (method.isAnnotationPresent(PublicEndpoint.class)) {
                     String methodPath = extractMethodPath(method);
