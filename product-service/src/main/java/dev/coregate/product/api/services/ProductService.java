@@ -1,6 +1,9 @@
 package dev.coregate.product.api.services;
 
+import java.util.UUID;
+
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
+import dev.coregate.product.api.dto.requests.UpdateProductRequest;
 import dev.coregate.product.api.dto.responses.CursorPageResponse;
 import dev.coregate.product.api.dto.responses.ProductResponse;
 
@@ -28,4 +31,16 @@ public interface ProductService {
    * @see ProductResponse
    */
   public CursorPageResponse<ProductResponse> searchProducts(String query, String cursor, int size);
+
+  /**
+   * Updates partial details of a product.
+   * This method allows updating specific fields of a product without requiring all fields.
+   * It checks if the product exists, updates the fields, and saves the changes.
+   * @param productId The ID of the product to update.
+   * @param request The request containing the fields to update.
+   * @throws ResourceNotFoundException if the product with the given ID does not exist.
+   * @return The updated product response.
+   * @see ProductResponse
+   */
+  public ProductResponse updateProduct(UUID productId, UpdateProductRequest request);
 }

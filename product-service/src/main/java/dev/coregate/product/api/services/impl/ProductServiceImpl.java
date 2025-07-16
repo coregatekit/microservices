@@ -6,11 +6,13 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
+import dev.coregate.product.api.dto.requests.UpdateProductRequest;
 import dev.coregate.product.api.dto.responses.CursorPageResponse;
 import dev.coregate.product.api.dto.responses.ProductResponse;
 import dev.coregate.product.api.entities.Product;
@@ -89,5 +91,11 @@ public class ProductServiceImpl implements ProductService {
     response.setNextCursor(nextCursor);
     response.setSize(products.size());
     return response;
+  }
+
+  @Override
+  public ProductResponse updateProduct(UUID productId, UpdateProductRequest request) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'updateProduct'");
   }
 }
