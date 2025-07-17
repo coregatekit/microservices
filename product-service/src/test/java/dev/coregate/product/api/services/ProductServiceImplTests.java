@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
+import dev.coregate.product.api.dto.requests.UpdateProductRequest;
 import dev.coregate.product.api.dto.responses.CursorPageResponse;
 import dev.coregate.product.api.dto.responses.ProductResponse;
 import dev.coregate.product.api.entities.Product;
@@ -414,6 +415,48 @@ public class ProductServiceImplTests {
       assertThat(response.getItems()).hasSize(size);
       assertThat(response.getNextCursor()).isNotNull();
       assertThat(response.isHasMore()).isTrue();
+    }
+  }
+
+  @Nested
+  @DisplayName("Update Product Tests")
+  class UpdateProductTests {
+    private UUID productId;
+    private Product existingProduct;
+    private UpdateProductRequest updateRequest;
+
+    @BeforeEach
+    void setUp() {
+      productId = UUID.randomUUID();
+
+      existingProduct = new Product();
+      existingProduct.setId(productId);
+      existingProduct.setName("Old Product Name");
+      existingProduct.setDescription("Old Description");
+      existingProduct.setSku("SKU");
+      existingProduct.setPrice(new BigDecimal(999.99));
+      existingProduct.setWeightKg(new BigDecimal(0.5));
+      existingProduct.setCategoryId(UUID.randomUUID());
+
+      updateRequest = new UpdateProductRequest();
+      updateRequest.setName("Updated Product Name");
+      updateRequest.setDescription("Updated Description");
+      updateRequest.setPrice(new BigDecimal(999.99));
+      updateRequest.setWeightKg(new BigDecimal(0.5));
+      updateRequest.setCategoryId(UUID.randomUUID());
+    }
+
+    @Test
+    void should_update_product_successfully() {
+      // Arrange
+
+      // Act
+      ProductResponse response = productService.updateProduct(productId, updateRequest);
+
+      // Assert
+      assertThat(response).isNotNull();
+      assertThat(response.getId()).isEqualTo(productId);
+      assertThat(response.getName()).isEqualTo("Updated Product Name");
     }
   }
 }
