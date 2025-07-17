@@ -52,7 +52,7 @@ public class ProductServiceImplTests {
 
   @Nested
   @DisplayName("Create Product Tests")
-  class CreateProduct {
+  class CreateProductTests {
     private CreateProductRequest createRequest;
     private Product product;
     private Product savedProduct;
@@ -138,7 +138,7 @@ public class ProductServiceImplTests {
 
   @Nested
   @DisplayName("Search Products Tests")
-  class searchProducts {
+  class SearchProductsTests {
     private List<Product> products;
     private List<ProductResponse> productResponses;
 
