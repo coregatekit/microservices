@@ -6,11 +6,13 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import dev.coregate.product.api.builders.ProductUpdateBuilder;
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
 import dev.coregate.product.api.dto.requests.UpdateProductRequest;
 import dev.coregate.product.api.dto.responses.CursorPageResponse;
@@ -95,7 +97,19 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   public ProductResponse updateProduct(UUID productId, UpdateProductRequest request) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'updateProduct'");
+    Optional<Product> existingProduct = productRepository.findById(productId);
+    if (existingProduct.isEmpty()) {
+      throw new ResourceNotFoundException("Product", "id", productId);
+    }
+
+    Product prepareUpdateProduct = new ProductUpdateBuilder(existingProduct.get(), categoryRepository)
+        .updateName(request.getName())
+        .updateDescription(request.getDescription())
+        .updatePrice(request.getPrice())
+        .updateWeightKg(request.getWeightKg())
+        .updateCategoryId(request.getCategoryId())
+        .build();
+
+    return productMapper.toResponse(productRepository.save(prepareUpdateProduct));
   }
 }

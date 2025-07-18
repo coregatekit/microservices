@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -421,13 +422,15 @@ public class ProductServiceImplTests {
   @Nested
   @DisplayName("Update Product Tests")
   class UpdateProductTests {
-    private UUID productId;
+    private UUID productId, categoryId;
     private Product existingProduct;
     private UpdateProductRequest updateRequest;
+    private ProductResponse expectedResponse;
 
     @BeforeEach
     void setUp() {
       productId = UUID.randomUUID();
+      categoryId = UUID.randomUUID();
 
       existingProduct = new Product();
       existingProduct.setId(productId);
@@ -443,20 +446,47 @@ public class ProductServiceImplTests {
       updateRequest.setDescription("Updated Description");
       updateRequest.setPrice(new BigDecimal(999.99));
       updateRequest.setWeightKg(new BigDecimal(0.5));
-      updateRequest.setCategoryId(UUID.randomUUID());
+      updateRequest.setCategoryId(categoryId);
     }
 
     @Test
     void should_update_product_successfully() {
       // Arrange
+      expectedResponse = new ProductResponse();
+      expectedResponse.setId(productId);
+      expectedResponse.setName("Updated Product Name");
+      expectedResponse.setDescription("Updated Description");
+      expectedResponse.setSku("SKU");
+      expectedResponse.setPrice(new BigDecimal(999.99));
+      expectedResponse.setWeightKg(new BigDecimal(0.5));
+      expectedResponse.setCategoryId(categoryId);
+
+      Product updatedProduct = new Product();
+      updatedProduct.setId(productId);
+      updatedProduct.setName(updateRequest.getName());
+      updatedProduct.setDescription(updateRequest.getDescription());
+      updatedProduct.setSku(existingProduct.getSku());
+      updatedProduct.setPrice(updateRequest.getPrice());
+      updatedProduct.setWeightKg(updateRequest.getWeightKg());
+      updatedProduct.setCategoryId(categoryId);
+
+      when(productRepository.findById(any(UUID.class))).thenReturn(Optional.of(existingProduct));
+      when(categoryRepository.existsById(categoryId)).thenReturn(true);
+      when(productRepository.save(any(Product.class))).thenReturn(updatedProduct);
+      when(productMapper.toResponse(any(Product.class))).thenReturn(expectedResponse);
 
       // Act
       ProductResponse response = productService.updateProduct(productId, updateRequest);
 
       // Assert
       assertThat(response).isNotNull();
-      assertThat(response.getId()).isEqualTo(productId);
-      assertThat(response.getName()).isEqualTo("Updated Product Name");
+      assertThat(response.getId()).isEqualTo(expectedResponse.getId());
+      assertThat(response.getName()).isEqualTo(expectedResponse.getName());
+      assertThat(response.getDescription()).isEqualTo(expectedResponse.getDescription());
+      assertThat(response.getSku()).isEqualTo(expectedResponse.getSku());
+      assertThat(response.getPrice()).isEqualTo(expectedResponse.getPrice());
+      assertThat(response.getWeightKg()).isEqualTo(expectedResponse.getWeightKg());
+      assertThat(response.getCategoryId()).isEqualTo(expectedResponse.getCategoryId());
     }
   }
 }
