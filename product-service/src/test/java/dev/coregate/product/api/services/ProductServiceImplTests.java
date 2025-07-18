@@ -488,5 +488,34 @@ public class ProductServiceImplTests {
       assertThat(response.getWeightKg()).isEqualTo(expectedResponse.getWeightKg());
       assertThat(response.getCategoryId()).isEqualTo(expectedResponse.getCategoryId());
     }
+
+    @Test
+    void should_throw_resource_not_found_exception_when_product_does_not_exist() {
+      // Arrange
+      when(productRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+      // Act & Assert
+      try {
+        productService.updateProduct(productId, updateRequest);
+      } catch (Exception e) {
+        assertThat(e).isInstanceOf(ResourceNotFoundException.class);
+        assertThat(e.getMessage()).contains("Product");
+      }
+    }
+
+    @Test
+    void should_throw_resource_not_found_exception_when_category_does_not_exist() {
+      // Arrange
+      when(productRepository.findById(any(UUID.class))).thenReturn(Optional.of(existingProduct));
+      when(categoryRepository.existsById(any(UUID.class))).thenReturn(false);
+
+      // Act & Assert
+      try {
+        productService.updateProduct(productId, updateRequest);
+      } catch (Exception e) {
+        assertThat(e).isInstanceOf(IllegalArgumentException.class);
+        assertThat(e.getMessage()).contains("Category");
+      }
+    }
   }
 }
