@@ -422,46 +422,38 @@ public class ProductServiceImplTests {
   @Nested
   @DisplayName("Update Product Tests")
   class UpdateProductTests {
-    private UUID productId, categoryId;
+    private UUID productId;
+    private UUID categoryId;
     private Product existingProduct;
     private UpdateProductRequest updateRequest;
+    private Product updatedProduct;
     private ProductResponse expectedResponse;
 
     @BeforeEach
     void setUp() {
       productId = UUID.randomUUID();
       categoryId = UUID.randomUUID();
+      LocalDateTime now = LocalDateTime.now();
 
       existingProduct = new Product();
       existingProduct.setId(productId);
       existingProduct.setName("Old Product Name");
       existingProduct.setDescription("Old Description");
-      existingProduct.setSku("SKU");
-      existingProduct.setPrice(new BigDecimal(999.99));
-      existingProduct.setWeightKg(new BigDecimal(0.5));
+      existingProduct.setSku("OLD-SKU-001");
+      existingProduct.setPrice(new BigDecimal("799.99"));
+      existingProduct.setWeightKg(new BigDecimal("0.3"));
       existingProduct.setCategoryId(UUID.randomUUID());
+      existingProduct.setCreatedAt(now.minusDays(1));
+      existingProduct.setUpdatedAt(now.minusDays(1));
 
       updateRequest = new UpdateProductRequest();
       updateRequest.setName("Updated Product Name");
       updateRequest.setDescription("Updated Description");
-      updateRequest.setPrice(new BigDecimal(999.99));
-      updateRequest.setWeightKg(new BigDecimal(0.5));
+      updateRequest.setPrice(new BigDecimal("999.99"));
+      updateRequest.setWeightKg(new BigDecimal("0.5"));
       updateRequest.setCategoryId(categoryId);
-    }
 
-    @Test
-    void should_update_product_successfully() {
-      // Arrange
-      expectedResponse = new ProductResponse();
-      expectedResponse.setId(productId);
-      expectedResponse.setName("Updated Product Name");
-      expectedResponse.setDescription("Updated Description");
-      expectedResponse.setSku("SKU");
-      expectedResponse.setPrice(new BigDecimal(999.99));
-      expectedResponse.setWeightKg(new BigDecimal(0.5));
-      expectedResponse.setCategoryId(categoryId);
-
-      Product updatedProduct = new Product();
+      updatedProduct = new Product();
       updatedProduct.setId(productId);
       updatedProduct.setName(updateRequest.getName());
       updatedProduct.setDescription(updateRequest.getDescription());
@@ -469,30 +461,47 @@ public class ProductServiceImplTests {
       updatedProduct.setPrice(updateRequest.getPrice());
       updatedProduct.setWeightKg(updateRequest.getWeightKg());
       updatedProduct.setCategoryId(categoryId);
+      updatedProduct.setCreatedAt(existingProduct.getCreatedAt());
+      updatedProduct.setUpdatedAt(now);
 
-      when(productRepository.findById(any(UUID.class))).thenReturn(Optional.of(existingProduct));
+      expectedResponse = new ProductResponse();
+      expectedResponse.setId(productId);
+      expectedResponse.setName("Updated Product Name");
+      expectedResponse.setDescription("Updated Description");
+      expectedResponse.setSku("OLD-SKU-001");
+      expectedResponse.setPrice(new BigDecimal("999.99"));
+      expectedResponse.setWeightKg(new BigDecimal("0.5"));
+      expectedResponse.setCategoryId(categoryId);
+      expectedResponse.setCreatedAt(existingProduct.getCreatedAt());
+      expectedResponse.setUpdatedAt(now);
+    }
+
+    @Test
+    void should_update_product_successfully() {
+      // Arrange
+      when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
       when(categoryRepository.existsById(categoryId)).thenReturn(true);
       when(productRepository.save(any(Product.class))).thenReturn(updatedProduct);
-      when(productMapper.toResponse(any(Product.class))).thenReturn(expectedResponse);
+      when(productMapper.toResponse(updatedProduct)).thenReturn(expectedResponse);
 
       // Act
       ProductResponse response = productService.updateProduct(productId, updateRequest);
 
       // Assert
       assertThat(response).isNotNull();
-      assertThat(response.getId()).isEqualTo(expectedResponse.getId());
-      assertThat(response.getName()).isEqualTo(expectedResponse.getName());
-      assertThat(response.getDescription()).isEqualTo(expectedResponse.getDescription());
-      assertThat(response.getSku()).isEqualTo(expectedResponse.getSku());
-      assertThat(response.getPrice()).isEqualTo(expectedResponse.getPrice());
-      assertThat(response.getWeightKg()).isEqualTo(expectedResponse.getWeightKg());
-      assertThat(response.getCategoryId()).isEqualTo(expectedResponse.getCategoryId());
+      assertThat(response.getId()).isEqualTo(productId);
+      assertThat(response.getName()).isEqualTo(updateRequest.getName());
+      assertThat(response.getDescription()).isEqualTo(updateRequest.getDescription());
+      assertThat(response.getSku()).isEqualTo(existingProduct.getSku());
+      assertThat(response.getPrice()).isEqualTo(updateRequest.getPrice());
+      assertThat(response.getWeightKg()).isEqualTo(updateRequest.getWeightKg());
+      assertThat(response.getCategoryId()).isEqualTo(categoryId);
     }
 
     @Test
     void should_throw_resource_not_found_exception_when_product_does_not_exist() {
       // Arrange
-      when(productRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+      when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
       // Act & Assert
       try {
@@ -504,18 +513,35 @@ public class ProductServiceImplTests {
     }
 
     @Test
-    void should_throw_resource_not_found_exception_when_category_does_not_exist() {
+    void should_throw_exception_when_category_does_not_exist() {
       // Arrange
-      when(productRepository.findById(any(UUID.class))).thenReturn(Optional.of(existingProduct));
-      when(categoryRepository.existsById(any(UUID.class))).thenReturn(false);
+      when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
+      when(categoryRepository.existsById(categoryId)).thenReturn(false);
 
       // Act & Assert
       try {
         productService.updateProduct(productId, updateRequest);
       } catch (Exception e) {
-        assertThat(e).isInstanceOf(IllegalArgumentException.class);
+        assertThat(e).isInstanceOf(ResourceNotFoundException.class);
         assertThat(e.getMessage()).contains("Category");
       }
+    }
+
+    @Test
+    void should_preserve_sku_and_creation_timestamp_during_update() {
+      // Arrange
+      when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
+      when(categoryRepository.existsById(categoryId)).thenReturn(true);
+      when(productRepository.save(any(Product.class))).thenReturn(updatedProduct);
+      when(productMapper.toResponse(updatedProduct)).thenReturn(expectedResponse);
+
+      // Act
+      ProductResponse response = productService.updateProduct(productId, updateRequest);
+
+      // Assert
+      assertThat(response.getSku()).isEqualTo(existingProduct.getSku());
+      assertThat(response.getCreatedAt()).isEqualTo(existingProduct.getCreatedAt());
+      assertThat(response.getUpdatedAt()).isNotEqualTo(existingProduct.getUpdatedAt());
     }
   }
 }
