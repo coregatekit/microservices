@@ -49,7 +49,7 @@ public class ProductUpdateBuilder {
       if (categoryRepository.existsById(categoryId)) {
         this.product.setCategoryId(categoryId);
       } else {
-        throw new ResourceNotFoundException("Category", "id", categoryId);
+        throw new ResourceNotFoundException("Category with ID " + categoryId + " does not exist.");
       }
     }
     return this;

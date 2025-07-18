@@ -99,7 +99,7 @@ public class ProductServiceImpl implements ProductService {
   public ProductResponse updateProduct(UUID productId, UpdateProductRequest request) {
     Optional<Product> existingProduct = productRepository.findById(productId);
     if (existingProduct.isEmpty()) {
-      throw new ResourceNotFoundException("Product", "id", productId);
+      throw new ResourceNotFoundException("Product with ID " + productId + " does not exist.");
     }
 
     Product prepareUpdateProduct = new ProductUpdateBuilder(existingProduct.get(), categoryRepository)

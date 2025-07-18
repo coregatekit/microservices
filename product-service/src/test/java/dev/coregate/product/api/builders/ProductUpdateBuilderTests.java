@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import dev.coregate.product.api.entities.Product;
+import dev.coregate.product.api.exceptions.ResourceNotFoundException;
 import dev.coregate.product.api.repositories.CategoryRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -238,7 +239,7 @@ public class ProductUpdateBuilderTests {
       // Then
       try {
         builder.updateCategoryId(newCategoryId).build();
-      } catch (IllegalArgumentException e) {
+      } catch (ResourceNotFoundException e) {
         assertThat(e.getMessage()).isEqualTo("Category with ID " + newCategoryId + " does not exist.");
       }
     }
