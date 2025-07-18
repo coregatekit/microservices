@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import dev.coregate.product.api.entities.Product;
+import dev.coregate.product.api.exceptions.ResourceNotFoundException;
 import dev.coregate.product.api.repositories.CategoryRepository;
 
 public class ProductUpdateBuilder {
@@ -48,7 +49,7 @@ public class ProductUpdateBuilder {
       if (categoryRepository.existsById(categoryId)) {
         this.product.setCategoryId(categoryId);
       } else {
-        throw new IllegalArgumentException("Category with ID " + categoryId + " does not exist.");
+        throw new ResourceNotFoundException("Category", "id", categoryId);
       }
     }
     return this;
