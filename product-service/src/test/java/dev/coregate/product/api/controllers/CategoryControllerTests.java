@@ -28,6 +28,7 @@ import dev.coregate.product.api.dto.responses.CategoryResponse;
 import dev.coregate.product.api.exceptions.ResourceNotFoundException;
 import dev.coregate.product.api.services.CategoryService;
 
+// TODO: Rewrite this test class to cover all methods in ProductController and split into multiple test classes if necessary
 @ExtendWith(MockitoExtension.class)
 public class CategoryControllerTests {
 

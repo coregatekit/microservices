@@ -1,9 +1,13 @@
 package dev.coregate.product.api.controllers;
 
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import dev.coregate.product.api.annotations.PublicEndpoint;
 import dev.coregate.product.api.constants.SecurityConstants;
 import dev.coregate.product.api.dto.requests.CreateProductRequest;
+import dev.coregate.product.api.dto.requests.UpdateProductRequest;
 import dev.coregate.product.api.dto.responses.ApiResponse;
 import dev.coregate.product.api.dto.responses.CursorPageResponse;
 import dev.coregate.product.api.dto.responses.ProductResponse;
@@ -79,6 +84,29 @@ public class ProductController {
     CursorPageResponse<ProductResponse> response = productService.searchProducts(query, cursor, size);
     ApiResponse<CursorPageResponse<ProductResponse>> apiResponse = ApiResponse
         .success("Products retrieved successfully", response);
+    return ResponseEntity.ok(apiResponse);
+  }
+
+  /**
+   * Updates partial product details.
+   * This endpoint allows users with the "MANAGER" role to update an existing
+   * product.
+   * It accepts a ProductUpdateRequest object containing the updated product
+   * details.
+   * 
+   * @param request the request object containing updated product details
+   * @see UpdateProductRequest
+   * @return ResponseEntity containing ApiResponse with ProductResponse
+   * @see ApiResponse
+   * @see ProductResponse
+   */
+  @PatchMapping("/{productId}")
+  @PreAuthorize(SecurityConstants.HAS_MANAGER_ROLE)
+  public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
+      @PathVariable("productId") UUID productId,
+      @RequestBody @Valid UpdateProductRequest request) {
+    ProductResponse response = productService.updateProduct(productId, request);
+    ApiResponse<ProductResponse> apiResponse = ApiResponse.success("Product updated successfully", response);
     return ResponseEntity.ok(apiResponse);
   }
 }
